@@ -1,39 +1,54 @@
-// src/routes.js
-
 /*
-    Aqui você pode definir a lógica para rotear e processar mensagens recebidas.
-    Por exemplo, você pode encaminhar mensagens para diferentes manipuladores
-    com base no conteúdo da mensagem, remetente, etc.
-    Este arquivo ajuda a manter o código organizado e modular.
-    Exemplo simples de roteamento de mensagens:
-*/
+ * ARQUIVO: src/routes.js
+ * * Responsabilidade: Mapear as "condições" (comandos)
+ * para as "ações" (handlers) corretas.
+ *
+ * ATUALIZADO: para rotear os comandos de recrutamento
+ * para o handler correto.
+ */
 
-const { RecrutamentoHandler } = require('./handlers/recrutamentoHandler.js');
+// 1. Importa o handler que contém TODA a lógica de recrutamento
+const { handlerRecrutamento } = require('./Handlers/recrutamentoHandler.js');
 
 const commandRoutes = [
+
     {
-        name: 'Funcoes de recrutamento',
+        name: 'Funcoes de Recrutamento',
+
+        /**
+         * Condição: Checa se o texto da mensagem começa com algum
+         * dos comandos do nosso módulo de recrutamento.
+         */
         condition: (msg, remoteJid, text) => {
-            return text && text.startsWith('!comando');
+            if (!text) return false;
+
+            const lowerText = text.toLowerCase();
+            return (
+                lowerText.startsWith('!processar') ||
+                lowerText.startsWith('!registrar') ||
+                lowerText.startsWith('!andamento') ||
+                lowerText.startsWith('!exportar')  ||
+                lowerText.startsWith('!menu')      ||
+                lowerText.startsWith('!ajuda')     ||
+                lowerText.startsWith('!comandos')
+            );
         },
-        action: async (sock, msg, text) => {
-            await sock.sendMessage(msg.key.remoteJid, { text: 'Você acionou o comando de texto!' });
-        }
+        /**
+         * Ação: Se a condição for verdadeira, o roteador entrega
+         * a mensagem (sock, msg, text) diretamente para o nosso handler.
+         */
+        action: handlerRecrutamento
     },
     {
-        name: 'Comando de Imagem',
-        condition: (msg, remoteJid, text) => {
-            return msg.message.imageMessage && text && text.startsWith('!imagem');
-        },
+        name: 'Debug: Get Group ID',
+        condition: (msg, remoteJid, text) => text === '!mygroupid',
         action: async (sock, msg, text) => {
-            await sock.sendMessage(msg.key.remoteJid, { text: 'Você acionou o comando de imagem!' });
+            await sock.sendMessage(msg.key.remoteJid, { text: `ID deste grupo: ${msg.key.remoteJid}`}, { quoted: msg });
         }
-    }
+    },
+
+
+    // ... Você pode adicionar outras rotas (outros módulos) aqui no futuro ...
 ];
 
 module.exports = { commandRoutes };
-
-/*
-    Usem os arquivos da pasta data para armazenar dados persistentes, como JSON.
-    Como arzenar os clas e atribuir eles vilas, usem a logica que quiserem, mas mantenham os dados
-*/
