@@ -52,6 +52,7 @@ function startBot() {
                 }
                 if (connection === 'open') {
                     console.log('✅ Conectado ao WhatsApp com sucesso!');
+                    console.log("Versão 2.1 - Teste Watchtower")
                 }
 
                 if (connection === 'close') {
