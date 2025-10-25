@@ -1,6 +1,6 @@
 // index.js
 /* Ponto de entrada principal do bot WhatsApp.
-   v1.8 - Simplificado: Força Pairing Code, sem Browser ID
+v1.8 - Simplificado: Força Pairing Code, sem Browser ID
 */
 const {
     DisconnectReason,
@@ -9,16 +9,10 @@ const {
 } = require('baileys');
 const pino = require('pino');
 
+const qrcode = require('qrcode-terminal');
 const { routeMessage } = require('./messageRouter.js');
-require('dotenv').config(); 
-const phoneNumber = process.env.PHONE_NUMBER; 
 
 function startBot() {
-    
-    if (!phoneNumber || phoneNumber.length < 10) {
-        console.error('❌ ERRO: PHONE_NUMBER não definido no .env!');
-        process.exit(1);
-    }
     let connecting = false;
 
     async function connectToWhatsApp() {
@@ -48,7 +42,6 @@ function startBot() {
                     console.log('Tentando exibir como QR Code (versão completa):');
                     
                     try {
-                        qrcode = require('qrcode-terminal');
                         qrcode.generate(qr, {small:true}); 
                     } catch (err) {
                         console.error('Erro ao gerar QR Code:', err);

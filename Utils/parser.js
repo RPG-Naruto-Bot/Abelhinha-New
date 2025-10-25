@@ -11,9 +11,9 @@
 */
 
 // Carrega os dicionários
-const clasAceitos = require('../src/Configs/clas.json');
-const patentesTexto = require('../src/Configs/patentes.json');
-const patentesEmojis = require('../src/Configs/patentes_emojis.json');
+const clasAceitos = require('../src/configs/clas.json');
+const patentesTexto = require('../src/configs/patentes.json');
+const patentesEmojis = require('../src/configs/patentes_emojis.json');
 const clanEmojis = Object.values(clasAceitos);
 const allKnownEmojis = [...clanEmojis, ...patentesEmojis];
 /**

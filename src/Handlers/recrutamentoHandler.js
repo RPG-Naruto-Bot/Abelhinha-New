@@ -16,7 +16,7 @@
 // Importa nossos módulos utilitários
 const parser = require('../../utils/parser.js');
 const db = require('../../utils/database.js');
-const config = require('../Configs/ids-groups.json');
+const config = require('../configs/ids-groups.json');
 
 // Importa libs
 const moment = require('moment-timezone');
