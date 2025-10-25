@@ -37,43 +37,54 @@ function extractText(msg) {
     } catch { return ''; }
 };
 
-// --- FUNÇÃO DE NORMALIZAÇÃO DE CLÃ (CORRIGIDA NOVAMENTE) ---
+// --- FUNÇÃO DE NORMALIZAÇÃO DE CLÃ (MAIS ROBUSTA AINDA) ---
 /**
  * Normaliza o nome OU emoji do clã e encontra o nome oficial e emoji.
  * @param {string} claInput O nome ou emoji do clã vindo da ficha/override.
  * @returns {{claEncontrado: string, emojiCla: string}} Objeto com nome oficial e emoji.
  */
 function normalizeCla(claInput) {
-    const inputLimpo = cleanValue(claInput);
-    let claEncontrado = inputLimpo;
-    let emojiCla = '';
-    const claNormInput = norm(inputLimpo); // Normaliza o input UMA VEZ
 
-    // 1. Tenta encontrar pelo Emoji PRIMEIRO (comparando normalizados)
+    // --- MUDANÇA: Limpeza AINDA MAIS AGRESSIVA ---
+    // Remove markdown, aspas, null, ZWS, E o Variation Selector 16 (FE0F)
+    const cleanAndStripVS = (s) => cleanValue(s).replace(/\0|\u200B|\uFE0F/g, ''); // Adicionado \uFE0F
+    const inputLimpo = cleanAndStripVS(claInput);
+    // --- FIM DA MUDANÇA ---
+
+    let claEncontrado = inputLimpo; // Padrão
+    let emojiCla = '';
+    const claNormInput = norm(inputLimpo); // Normaliza (NFD, lowercase) o input JÁ LIMPO E STRIPPADO
+
+    // 1. Tenta encontrar pelo Emoji PRIMEIRO (comparando normalizados e limpos)
     for (const [nomeClaOficial, emoji] of Object.entries(clasAceitos)) {
-        // --- MUDANÇA AQUI ---
-        // Compara a versão normalizada do input com a versão normalizada do emoji do JSON
-        if (emoji && claNormInput === norm(emoji)) {
-        // --- FIM DA MUDANÇA ---
+        // Limpa e normaliza o emoji do JSON também para garantir
+        const emojiLimpo = cleanAndStripVS(emoji || '');
+        const emojiNormLimpo = norm(emojiLimpo);
+
+        // -- DEBUG DETALHADO DA COMPARAÇÃO --
+        // console.log(`[normalizeCla DEBUG] Comparando InputNorm ('${claNormInput}') com EmojiNorm ('${emojiNormLimpo}') para ${nomeClaOficial}`);
+
+        if (emoji && claNormInput === emojiNormLimpo) {
             claEncontrado = nomeClaOficial;
-            emojiCla = emoji; // Guarda o emoji original (bonito) do JSON
-            // console.log(`[normalizeCla] Match por Emoji NORMALIZADO: Input '${claInput}' -> Cla '${claEncontrado}', Emoji '${emojiCla}'`); // Debug
+            emojiCla = emoji; // Guarda o emoji ORIGINAL do JSON
             return { claEncontrado, emojiCla };
         }
     }
 
-    // 2. Se não achou pelo emoji, tenta encontrar pelo Nome (usando input normalizado)
+    // 2. Se não achou pelo emoji, tenta encontrar pelo Nome
     for (const [nomeClaOficial, emoji] of Object.entries(clasAceitos)) {
-        // Compara o nome oficial (já minúsculo no JSON, idealmente) com o input normalizado
-        if (claNormInput.includes(nomeClaOficial)) { // Assume que nomeClaOficial no JSON já está normalizado (minúsculo, sem acento)
+        // Compara nome oficial (idealmente já normalizado no JSON) com input normalizado+limpo
+        if (claNormInput.includes(nomeClaOficial)) {
             claEncontrado = nomeClaOficial;
             emojiCla = emoji;
-            // console.log(`[normalizeCla] Match por Nome: Input '${claInput}' -> Cla '${claEncontrado}', Emoji '${emojiCla}'`); // Debug
             break;
         }
     }
 
-    // console.log(`[normalizeCla] Sem Match: Input '${claInput}' -> Cla '${claEncontrado}', Emoji '${emojiCla}'`); // Debug
+    // Se chegou aqui, não houve match por emoji nem por nome
+    if (claEncontrado === inputLimpo) { // Verifica se claEncontrado ainda é o input original
+       console.log(`[normalizeCla DEBUG] SEM MATCH DEFINITIVO. Input '${claInput}' -> Retornando Cla '${claEncontrado}', Emoji '${emojiCla}'`);
+    }
     return { claEncontrado, emojiCla };
 }
 // --- FIM DA FUNÇÃO CORRIGIDA ---

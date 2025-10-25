@@ -11,11 +11,11 @@
  * É importante notar que este handler é Adicionado     
  * ao roteador de comandos em src/routes.js.
  * v1.8: Adicionado comando !menu para admins.
- */
+*/
 
 // Importa nossos módulos utilitários
-const parser = require('../../Utils/parser.js');
-const db = require('../../Utils/database.js');
+const parser = require('../../utils/parser.js');
+const db = require('../../utils/database.js');
 const config = require('../Configs/ids-groups.json');
 
 // Importa libs
@@ -23,19 +23,31 @@ const moment = require('moment-timezone');
 const fs = require('fs');
 const path = require('path');
 
+// --- Função auxiliar: gerar vCard simples (fallback) ---
+function gerarVCardFallback(nome, numero) {
+    const tel = (numero || '').replace(/[^0-9]/g, '');
+    const lines = [
+        'BEGIN:VCARD',
+        'VERSION:3.0',
+        `FN:${nome || ''}`
+    ];
+    if (tel) lines.push(`TEL;TYPE=CELL:${tel}`);
+    lines.push('END:VCARD');
+    return lines.join('\n');
+}
+// --- Fim gerarVCardFallback ---
+
+
 // --- Funções Auxiliares (Mockups) ---
 // --- Função checkAdmin ATUALIZADA com Logs ---
 const checkAdmin = async (sock, msg) => {
     const groupId = msg.key.remoteJid;
     // Garante que só execute em grupos
     if (!groupId || !groupId.endsWith('@g.us')) {
-        console.log('[checkAdmin] Ignorado: Não é uma mensagem de grupo.');
         return false;
     }
 
     const senderJid = msg.key.participant || msg.key.remoteJid; // Quem enviou
-
-    console.log(`[checkAdmin] Verificando admin status para ${senderJid} no grupo ${groupId}`);
 
     try {
         // Busca os metadados do grupo
@@ -45,25 +57,15 @@ const checkAdmin = async (sock, msg) => {
         const participantInfo = groupMetadata.participants.find(p => p.id === senderJid);
 
         if (!participantInfo) {
-            console.warn(`[checkAdmin] ALERTA: Não foi possível encontrar informações do participante ${senderJid} na lista do grupo.`);
             return false; // Se não achou o participante, não pode ser admin
         }
 
-        // --- DEBUG DETALHADO ---
-        console.log(`[checkAdmin] Info do participante ${senderJid}:`, participantInfo);
-        console.log(`[checkAdmin] Valor da propriedade 'admin':`, participantInfo.admin); 
-        // --- FIM DO DEBUG ---
-
         // A lógica de verificação (padrão Baileys)
-        const isAdmin = participantInfo.admin === 'admin' || participantInfo.admin === 'superadmin';
-        
-        console.log(`[checkAdmin] Resultado da verificação para ${senderJid}: ${isAdmin}`);
-        
+        const isAdmin = participantInfo.admin === 'admin' || participantInfo.admin === 'superadmin';        
         return isAdmin; // Retorna true se for 'admin' ou 'superadmin', false caso contrário (incluindo null/undefined)
 
     } catch (e) {
         // Se der erro (ex: bot não está mais no grupo, API mudou), assume que não é admin
-        console.error("[checkAdmin] ERRO ao buscar metadados ou verificar admin:", e.message || e);
         return false;
     }
 };
@@ -78,7 +80,6 @@ async function handlerRecrutamento(sock, msg, text) {
 
     // --- 1. Verificação de Escopo (História 2.1) ---
     if (!config.allowedRecruitmentGroups.includes(from)) {
-        console.log(`[HandlerRecrutamento] Comando ignorado em grupo não permitido: ${from}`);
         return;
     }
 
@@ -111,114 +112,99 @@ async function handlerRecrutamento(sock, msg, text) {
     }
 }
 
-/**
- * Lógica do comando !processar (História 2.2 + Overrides)
- * v1.6 - Implementado parsing de override aprimorado com regex
+/*
+ * Lógica do comando !processar
+ * v1.11 - Implementada separação por nova linha (\n) entre número e overrides.
+ * Formato Esperado:
+ * !processar <numero com espaços/etc>
+ * [opcional: overrides chave=valor na(s) linha(s) seguinte(s)]
  */
-async function executarRegistrar(sock, info, args, text) {
+async function executarRegistrar(sock, info, args, text) { // args não é mais usado diretamente para parsing principal
     const from = info.key.remoteJid;
     try {
         const isAdmin = await checkAdmin(sock, info);
         if (!isAdmin) {
-            await sock.sendMessage(from, { text: '⚠ Apenas administradores podem usar este comando.' }, { quoted: info });
+             await sock.sendMessage(from, { text: '⚠ Apenas administradores podem usar este comando.' }, { quoted: info });
             return;
         }
 
         const ctx = info.message?.extendedTextMessage?.contextInfo;
         const quoted = ctx?.quotedMessage;
 
-        // --- MUDANÇA: Parsing de Overrides Melhorado ---
-        // 1. Pega o número
-        const numeroLimpo = (args[0] || '').replace(/[^0-9]/g, '');
+        // --- MUDANÇA: Extração de Número e Overrides com Base em Linhas ---
+
+        // 1. Separa o texto completo em linhas
+        const lines = text.trim().split('\n');
+        const firstLine = lines[0].trim(); // Linha do comando e número
+        // Junta todas as linhas *depois* da primeira, separadas por espaço, para parsing dos overrides
+        const overrideLinesString = lines.length > 1 ? lines.slice(1).join(' ').trim() : ''; 
+
+        // 2. Extrai o comando e o número da *primeira linha*
+        const commandParts = firstLine.split(' ');
+        // Pega TUDO depois do primeiro espaço como parte do número
+        const numberInput = commandParts.length > 1 ? commandParts.slice(1).join(' ').trim() : ''; 
+
+        // 3. Limpa e valida o número
+        const numeroLimpo = (numberInput || '').replace(/[^0-9]/g, '');
         if (numeroLimpo.length < 8) {
-             await sock.sendMessage(from, { text: '⚠ Você precisa informar um número de celular válido.\nEx: !processar 5544912345678' }, { quoted: info });
+            await sock.sendMessage(from, { text: '⚠ Número de celular inválido ou não encontrado na primeira linha.\nEx:\n!processar +55 43 9999-8888\ncla=Exemplo' }, { quoted: info });
             return;
-         }
+        }
         const targetJid = `${numeroLimpo}@s.whatsapp.net`;
 
-        // 2. Pega os argumentos para override
-        const overrideArgs = args.slice(1);
+        // 4. Extrai os overrides da string formada pela(s) linha(s) *seguinte(s)*
         const overrides = {};
-        const camposPermitidos = ['nome', 'cla', 'recrutadopor']; // Campos que podem ser sobrescritos
-
-        // Junta os argumentos (ex: ['cla=Uzumaki', 'recrutadopor="Erick', 'Senju', '♓🈂️"'])
-        // de volta em uma string e usa regex para extrair chave=valor (lidando com aspas)
-        const argsString = overrideArgs.join(' ');
-        // Regex: chave=valor OU chave="valor com espacos" OU chave='valor com espacos'
-        const overrideRegex = /(\w+)=("([^"]+)"|'([^']+)'|(\S+))/g;
-        let match;
-
-        while ((match = overrideRegex.exec(argsString)) !== null) {
-            // match[1] é a chave (ex: "cla")
-            // match[3] é o valor dentro de aspas duplas
-            // match[4] é o valor dentro de aspas simples
-            // match[5] é o valor sem aspas
-            const key = match[1].trim().toLowerCase();
-            const value = match[3] || match[4] || match[5]; // Pega o valor correto
-
-            if (value && camposPermitidos.includes(key)) {
-                // Mapeia 'recrutadopor' para 'recrutadoPorTexto'
-                const finalKey = key === 'recrutadopor' ? 'recrutadoPorTexto' : key;
-                overrides[finalKey] = value.trim(); // Remove espaços extras das pontas do valor
+        const camposPermitidos = ['nome', 'cla', 'recrutadopor'];
+        if (overrideLinesString) { // Só processa se houver linhas de override
+            const overrideRegex = /(\w+)=("([^"]+)"|'([^']+)'|(\S+))/g;
+            let match;
+            while ((match = overrideRegex.exec(overrideLinesString)) !== null) {
+                const key = match[1].trim().toLowerCase();
+                const value = match[3] || match[4] || match[5];
+                if (value && camposPermitidos.includes(key)) {
+                    const finalKey = key === 'recrutadopor' ? 'recrutadoPorTexto' : key;
+                    overrides[finalKey] = value.trim();
+                }
             }
         }
-        console.log("[Registrar] Overrides encontrados:", overrides); // Log para debug
+        console.log("[Registrar] Número Input:", numberInput);
+        console.log("[Registrar] Overrides encontrados:", overrides);
         // --- FIM DA MUDANÇA ---
 
-
-        // Definir Texto da Ficha e Autor
+        // --- LÓGICA AJUSTADA PARA DETERMINAR textoFicha e autorDaFichaJid ---
         let textoFicha = '';
         let autorDaFichaJid = null;
 
         if (quoted) {
-            // Cenário 1: Resposta
+            // Cenário 1: Resposta (Sempre pega texto da resposta como base)
             textoFicha = parser.extractText(quoted);
-            autorDaFichaJid = ctx?.participant; // Pega o participante do contexto da resposta
-            if (!autorDaFichaJid && Object.keys(overrides).length === 0 && !text.includes('\n')) {
-                // Se não achou o autor da ficha original E não há overrides E não é modo manual
-                await sock.sendMessage(from, { text: '⚠ Não consegui identificar o autor da ficha original. Tente novamente.' }, { quoted: info });
-                return;
-             }
+            autorDaFichaJid = ctx?.participant;
+            // Validação do autor da ficha original (se aplicável e necessário)
+            // if (!autorDaFichaJid) { /* ... (erro autor) ... */ return; } // Removido - Deixa o parser lidar
+        } else if (Object.keys(overrides).length > 0) {
+            // Cenário 2: Sem resposta, MAS com overrides. Ficha base é vazia.
+            textoFicha = ''; // Força depender dos overrides
+            autorDaFichaJid = null;
+        } else {
+            // Cenário 3: Sem resposta E SEM overrides. Erro.
+            await sock.sendMessage(from, { text: '⚠ Comando inválido. Use respondendo a uma ficha OU forneça overrides na linha abaixo (ex:\ncla=...).' }, { quoted: info });
+            return;
         }
-
-        // Cenário 2: Manual (no corpo) OU Overrides sem resposta
-        // Só entra aqui se NÃO for uma resposta OU se for uma resposta mas overrides foram passados
-        if (!quoted || Object.keys(overrides).length > 0) {
-             const linhas = text.split('\n');
-             // Verifica se tem MAIS de uma linha (indicando ficha no corpo) E se NÃO HÁ overrides
-             if (linhas.length > 1 && Object.keys(overrides).length === 0 && !quoted) {
-                 textoFicha = linhas.slice(1).join('\n');
-                 autorDaFichaJid = null; // Não há quem remover
-             } else if (Object.keys(overrides).length > 0) {
-                 // Se tem overrides, tentamos usar o texto da resposta (se houver) como base
-                 if(quoted) {
-                     textoFicha = parser.extractText(quoted); // Pega texto base
-                     if (!autorDaFichaJid) autorDaFichaJid = ctx?.participant; // Tenta pegar de novo
-                 } else {
-                     textoFicha = ''; // Sem resposta, força depender dos overrides
-                     autorDaFichaJid = null;
-                 }
-             } else if (!quoted) { // Nenhuma das condições anteriores e não é resposta
-                 await sock.sendMessage(from, { text: '⚠ Comando inválido. Use respondendo a uma ficha OU digite a ficha abaixo OU use overrides (cla=...).' }, { quoted: info });
-                 return;
-             }
-        }
+        // --- FIM DA LÓGICA AJUSTADA ---
 
 
-        // --- Processar a Ficha ---
+        // --- Processar a Ficha Base ---
         await sock.sendMessage(from, { react: { text: '🛠️', key: info.key } });
-
-        // Mesmo que textoFicha esteja vazio, o parser lida com isso
-        const dadosParseados = parser.parseFicha(textoFicha);
+        const dadosParseados = parser.parseFicha(textoFicha); // Pode receber texto vazio
 
         // Verifica erro do parser SOMENTE se o campo específico não foi fornecido no override
         if (dadosParseados.error) {
              if (dadosParseados.error.includes('Nome') && !overrides.nome) {
                  await sock.sendMessage(from, { react: { text: '❌', key: info.key } });
-                 await sock.sendMessage(from, { text: `❌ Erro ao ler a ficha: ${dadosParseados.error}. Forneça o nome (ex: nome=Fulano).` }, { quoted: info });
+                 await sock.sendMessage(from, { text: `❌ Erro: ${dadosParseados.error}. Forneça o nome (ex:\nnome=Fulano).` }, { quoted: info });
                  return;
              }
-             console.log("[Registrar] Erro do parser ignorado devido a overrides:", dadosParseados.error);
+             console.log("[Registrar] Erro do parser base ignorado devido a overrides:", dadosParseados.error);
         }
 
         // Aplica Overrides e Normaliza/Limpa
@@ -243,9 +229,9 @@ async function executarRegistrar(sock, info, args, text) {
 
         // Validação final: Nome e Clã são obrigatórios
         if (!dadosFinais.nome || !dadosFinais.cla) {
-             await sock.sendMessage(from, { react: { text: '❌', key: info.key } });
-             await sock.sendMessage(from, { text: `❌ Erro: Campos obrigatórios faltando. Verifique Nome e Clã (pode usar cla=...).` }, { quoted: info });
-            return;
+              await sock.sendMessage(from, { react: { text: '❌', key: info.key } });
+              await sock.sendMessage(from, { text: `❌ Erro: Campos obrigatórios faltando. Verifique Nome e Clã (pode usar cla=...).` }, { quoted: info });
+              return;
         }
 
         // --- Preparar Dados para Salvar ---
@@ -258,8 +244,20 @@ async function executarRegistrar(sock, info, args, text) {
             data: moment().tz('America/Sao_Paulo').format('DD/MM/YYYY')
         };
 
-        // --- Salvar no Banco de Dados ---
-        db.saveFicha(targetJid, dadosParaSalvar);
+        // --- Salvar no Banco de Dados (SQLite async) ---
+        const fichaParaSalvar = {
+            ...dadosParaSalvar,
+            timestamp: Date.now(),
+            vcard: dadosParseados.vcard || gerarVCardFallback(dadosParaSalvar.nome, numeroLimpo)
+        };
+
+        try {
+            await db.saveFicha(targetJid, fichaParaSalvar);
+        } catch (eSave) {
+            console.error("Erro ao salvar ficha no DB:", eSave);
+            await sock.sendMessage(from, { text: '❌ Falha ao salvar a ficha no banco de dados.' }, { quoted: info });
+            return;
+        }
 
         // --- Feedback e Ação Final (Remover) ---
         await sock.sendMessage(from, { react: { text: '✅', key: info.key } });
@@ -270,7 +268,7 @@ async function executarRegistrar(sock, info, args, text) {
         if (autorDaFichaJid) {
             try {
                 await sock.sendMessage(from, { text: `ℹ️ Removendo @${autorDaFichaJid.split('@')[0]} do grupo...`, mentions: [autorDaFichaJid] });
-                await sock.groupParticipantsUpdate(from, [autorDaFichaJid], 'remove'); // Comentado para testes
+                //await sock.groupParticipantsUpdate(from, [autorDaFichaJid], 'remove'); // Comentado para testes
             } catch (e) {
                 console.error('Falha ao remover recruta:', e);
                 await sock.sendMessage(from, { text: `⚠ Falha ao remover @${autorDaFichaJid.split('@')[0]}. Verifique minhas permissões.`, mentions: [autorDaFichaJid] });
@@ -284,7 +282,7 @@ async function executarRegistrar(sock, info, args, text) {
 }
 
 /**
- * Lógica do comando !andamento (Histórias 2.3 e 2.4 - ATUALIZADO)
+ * Lógica do comando !andamento (Filtro por Missão Atual)
  */
 async function executarAndamento(sock, info, args) {
     const from = info.key.remoteJid;
@@ -292,68 +290,107 @@ async function executarAndamento(sock, info, args) {
 
     try {
         const isAdmin = await checkAdmin(sock, info);
-        if (!isAdmin) {
-            await sock.sendMessage(from, { text: '⚠ Apenas administradores podem usar este comando.' }, { quoted: info });
+        if (!isAdmin) { /* ... (erro admin) ... */ return; }
+
+        // --- LÓGICA DE DEFINIÇÃO DO PERÍODO DA MISSÃO ---
+        const now = moment().tz('America/Sao_Paulo');
+        const dayOfWeek = now.isoWeekday(); // 1 (Segunda) a 7 (Domingo)
+
+        let startOfPeriod, endOfPeriod, missionPeriodStr;
+
+        if (dayOfWeek >= 1 && dayOfWeek <= 2) { // Segunda ou Terça -> Período Seg-Ter
+            startOfPeriod = now.clone().isoWeekday(1).startOf('day'); // Vai para a Segunda 00:00
+            endOfPeriod = now.clone().isoWeekday(2).endOf('day');   // Vai para a Terça 23:59:59
+            missionPeriodStr = `Missão Atual (Seg-Ter)`;
+        } else if (dayOfWeek >= 4 && dayOfWeek <= 5) { // Quinta ou Sexta -> Período Qui-Sex
+            startOfPeriod = now.clone().isoWeekday(4).startOf('day'); // Vai para a Quinta 00:00
+            endOfPeriod = now.clone().isoWeekday(5).endOf('day');   // Vai para a Sexta 23:59:59
+            missionPeriodStr = `Missão Atual (Qui-Sex)`;
+        } else {
+            // Quarta, Sábado ou Domingo -> Mostra o período da ÚLTIMA missão concluída
+            if (dayOfWeek === 3) { // Quarta -> Mostra Seg-Ter anterior
+                 startOfPeriod = now.clone().isoWeekday(1).startOf('day');
+                 endOfPeriod = now.clone().isoWeekday(2).endOf('day');
+                 missionPeriodStr = `Última Missão (Seg-Ter)`;
+            } else { // Sábado ou Domingo -> Mostra Qui-Sex anterior
+                 startOfPeriod = now.clone().isoWeekday(4).startOf('day');
+                 endOfPeriod = now.clone().isoWeekday(5).endOf('day');
+                 missionPeriodStr = `Última Missão (Qui-Sex)`;
+            }
+             // Ajuste para garantir que estamos pegando a semana correta se já passou o dia
+             if (now.isBefore(startOfPeriod)) {
+                 // Ex: Se hoje é Domingo e startOfPeriod é Quinta da *próxima* semana
+                 // precisamos subtrair 7 dias para pegar a Quinta *passada*.
+                 // Isso não deve acontecer com isoWeekday, mas é uma segurança.
+                 // UPDATE: A lógica padrão do isoWeekday já deve lidar com isso corretamente.
+                 // Se hoje é Domingo (7), isoWeekday(4) vai para a Quinta da mesma semana.
+             }
+        }
+
+        const startTimestamp = startOfPeriod.valueOf();
+        const endTimestamp = endOfPeriod.valueOf();
+        const periodoExibicao = `${startOfPeriod.format('DD/MM')} a ${endOfPeriod.format('DD/MM')}`;
+
+        console.log(`[Andamento] Período calculado: ${missionPeriodStr} (${periodoExibicao})`);
+        // --- FIM DA LÓGICA DE PERÍODO ---
+
+
+        // --- BUSCA NO BANCO DE DADOS (COM FILTRO) ---
+        // Chama a nova função do DB passando os timestamps
+        const fichasArray = await db.getFichasByTimestamp(startTimestamp, endTimestamp); // Retorna ARRAY
+        // --- FIM DA BUSCA ---
+
+        // Validação se encontrou fichas NO PERÍODO
+        if (!fichasArray || fichasArray.length === 0) {
+            await sock.sendMessage(from, { text: `ℹ️ Nenhuma ficha encontrada para a ${missionPeriodStr} (${periodoExibicao}).` }, { quoted: info });
             return;
         }
 
+        // --- Processamento (Clas ou Players) ---
+        // A lógica de contagem agora opera diretamente no 'fichasArray' filtrado
         if (subComando === 'clas') {
-            // --- Lógica História 2.3 (Sem alteração) ---
-            const fichas = db.getAllFichas();
-            const fichasArray = Object.values(fichas);
-
-            if (fichasArray.length === 0) {
-                await sock.sendMessage(from, { text: 'ℹ️ Nenhuma ficha foi processada ainda.' }, { quoted: info });
-                return;
-            }
-
             const contagem = {};
+            // --- CORREÇÃO: Loop de Contagem ---
             for (const ficha of fichasArray) {
                 const cla = ficha.cla || 'Sem Clã';
                 contagem[cla] = (contagem[cla] || 0) + 1;
             }
+            // --- FIM DA CORREÇÃO ---
 
-            let resposta = '📊 *Andamento do Recrutamento por Clã*\n\n';
+            let resposta = `📊 *Andamento por Clã (${missionPeriodStr} - ${periodoExibicao})*\n\n`;
             const clasOrdenados = Object.entries(contagem).sort(([, a], [, b]) => b - a);
 
+            // --- CORREÇÃO: Loop de Formatação ---
             for (const [cla, total] of clasOrdenados) {
                 const emoji = fichasArray.find(f => f.cla === cla)?.emojiCla || '❓';
                 resposta += `${emoji} *${cla}:* ${total} recrutas\n`;
             }
-            resposta += `\n*Total:* ${fichasArray.length} fichas processadas.`;
+            // --- FIM DA CORREÇÃO ---
+
+            resposta += `\n*Total no Período:* ${fichasArray.length} fichas.`;
             await sock.sendMessage(from, { text: resposta }, { quoted: info });
 
         } else if (subComando === 'players') {
-            // --- LÓGICA ATUALIZADA (História 2.4 Reinterpretada) ---
-            const fichas = db.getAllFichas();
-            const fichasArray = Object.values(fichas);
-
-            if (fichasArray.length === 0) {
-                await sock.sendMessage(from, { text: 'ℹ️ Nenhuma ficha foi processada ainda.' }, { quoted: info });
-                return;
-            }
-
-            // Agora agrupa pelo campo 'recrutadoPorTexto' (o nome semi-limpo do recrutador)
             const contagemPorRecrutador = {};
+            // --- CORREÇÃO: Loop de Contagem ---
             for (const ficha of fichasArray) {
-                const recrutadorNome = ficha.recrutadoPorTexto || 'Não Informado'; // Usa o campo correto
+                const recrutadorNome = ficha.recrutadoPorTexto || 'Não Informado';
                 contagemPorRecrutador[recrutadorNome] = (contagemPorRecrutador[recrutadorNome] || 0) + 1;
             }
+            // --- FIM DA CORREÇÃO ---
 
-            let resposta = '📈 *Recrutamento por Player*\n_(Quem indicou o recruta)_\n\n';
+            let resposta = `📈 *Recrutamento por Player (${missionPeriodStr} - ${periodoExibicao})*\n_(Quem indicou o recruta)_\n\n`;
             const recrutadoresOrdenados = Object.entries(contagemPorRecrutador)
-                .sort(([, a], [, b]) => b - a); // Ordena por quem recrutou mais
+                .sort(([, a], [, b]) => b - a);
 
+            // --- CORREÇÃO: Loop de Formatação ---
             for (const [nomeRecrutador, total] of recrutadoresOrdenados) {
-                 // Exibe o nome semi-limpo (com emojis) e a contagem
                 resposta += `👥 *${nomeRecrutador}:* ${total} recrutas\n`;
             }
+            // --- FIM DA CORREÇÃO ---
 
-            resposta += `\n*Total:* ${fichasArray.length} fichas processadas.`;
-            // Não precisa mais de menções aqui
+            resposta += `\n*Total no Período:* ${fichasArray.length} fichas.`;
             await sock.sendMessage(from, { text: resposta }, { quoted: info });
-            // --- FIM DA LÓGICA ATUALIZADA ---
-
         } else {
             // Nenhum sub-comando válido
             await sock.sendMessage(from, { text: '⚠ Comando inválido. Use:\n*!andamento clas*\n*!andamento players*' }, { quoted: info });
@@ -379,8 +416,9 @@ async function executarExportarContatos(sock, info, args) {
             return;
         }
 
-        const fichas = db.getAllFichas();
-        let fichasArray = Object.values(fichas); // Usa 'let' para poder reatribuir
+        // --- MUDANÇA: agora await para DB async ---
+        const fichas = await db.getAllFichas();
+        let fichasArray = Array.isArray(fichas) ? fichas : Object.values(fichas); // Usa 'let' para poder reatribuir
 
         if (fichasArray.length === 0) {
             await sock.sendMessage(from, { text: 'ℹ️ Nenhuma ficha foi processada ainda para exportar.' }, { quoted: info });

@@ -1,15 +1,12 @@
 // index.js
-
 /* Ponto de entrada principal do bot WhatsApp.
    v1.8 - Simplificado: Força Pairing Code, sem Browser ID
 */
-
 const {
     DisconnectReason,
     makeWASocket,
     useMultiFileAuthState
 } = require('baileys');
-const { Boom } = require('@hapi/boom');
 const pino = require('pino');
 
 const { routeMessage } = require('./messageRouter.js');
@@ -22,14 +19,12 @@ function startBot() {
         console.error('❌ ERRO: PHONE_NUMBER não definido no .env!');
         process.exit(1);
     }
-    
     let connecting = false;
 
     async function connectToWhatsApp() {
         if (connecting) return;
         connecting = true;
         console.log('🤖 Iniciando o bot...');
-
         try {
             const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys');
 
@@ -37,13 +32,8 @@ function startBot() {
                 logger: pino({ level: 'silent' }),
                 printQRInTerminal: false, // Vamos lidar com o código manualmente
                 auth: state,
-                // --- MUDANÇA: REMOVIDO BROWSER ID ---
-                // Deixa o Baileys usar o padrão
-                // --- FIM DA MUDANÇA ---
                 syncFullHistory: false,
-                // --- MUDANÇA: FORÇANDO PAIRING CODE SIMPLES ---
                 pairingCode: true 
-                // --- FIM DA MUDANÇA ---
             });
 
             sock.ev.on('creds.update', saveCreds);
@@ -58,10 +48,8 @@ function startBot() {
                     console.log('Tentando exibir como QR Code (versão completa):');
                     
                     try {
-                        // --- MUDANÇA AQUI ---
                         qrcode = require('qrcode-terminal');
-                        qrcode.generate(qr); 
-                        // --- FIM DA MUDANÇA ---
+                        qrcode.generate(qr, {small:true}); 
                     } catch (err) {
                         console.error('Erro ao gerar QR Code:', err);
                         console.log('String recebida (não pôde ser convertida em QR):', qr);
@@ -69,8 +57,6 @@ function startBot() {
                     
                     console.log('====================================');
                 }
-                // --- FIM DA MUDANÇA ---
-
                 if (connection === 'open') {
                     console.log('✅ Conectado ao WhatsApp com sucesso!');
                 }
@@ -98,8 +84,6 @@ function startBot() {
                     }
                 }
             });
-
-            // (Listener 'messages.upsert' - sem alteração)
             sock.ev.on('messages.upsert', async (m) => {
                 const msg = m.messages && m.messages[0];
                 if (!msg || !msg.message || msg.key.remoteJid === 'status@broadcast') return;

@@ -8,7 +8,7 @@
  */
 
 // 1. Importa o handler que contém TODA a lógica de recrutamento
-const { handlerRecrutamento } = require('./Handlers/recrutamentoHandler.js');
+const { handlerRecrutamento } = require('./handlers/recrutamentoHandler');
 
 const commandRoutes = [
 
@@ -46,8 +46,6 @@ const commandRoutes = [
             await sock.sendMessage(msg.key.remoteJid, { text: `ID deste grupo: ${msg.key.remoteJid}`}, { quoted: msg });
         }
     },
-
-
     // ... Você pode adicionar outras rotas (outros módulos) aqui no futuro ...
 ];
 
