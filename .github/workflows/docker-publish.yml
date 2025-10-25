@@ -1,0 +1,50 @@
+# Arquivo: .github/workflows/docker-publish.yml
+# Workflow do GitHub Actions para construir a imagem Docker e publicá-la no GHCR
+
+name: Docker Build and Push # Nome do Workflow (aparece na aba Actions do GitHub)
+
+# Gatilho: Executa este workflow sempre que houver um push na branch 'main'
+on:
+  push:
+    branches: [ main ] # Gatilho ativado apenas para a branch 'main'
+
+# Permissões: Garante que o job tenha permissão para escrever no GHCR
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest # Usa a versão mais recente do Ubuntu nos runners do GitHub
+
+    steps:
+      # 1. Checkout do Código: Baixa o código da branch 'main' para o runner
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Login no GitHub Container Registry (GHCR)
+      # Usa o token GITHUB_TOKEN gerado automaticamente pelo Actions,
+      # que tem permissão para escrever pacotes no repositório/organização.
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }} # Seu nome de usuário GitHub
+          password: ${{ secrets.GITHUB_TOKEN }} # Token automático do Actions
+
+      # 3. Extrai metadados (tags) para a imagem Docker
+      # Cria tags como :latest e uma tag baseada no SHA do commit (bom para rastreabilidade)
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }} # Usa o nome do repositório automaticamente (ex: ghcr.io/RPG-Naruto-Bot/Abelhinha-New)
+
+      # 4. Constrói a imagem Docker e a envia (push) para o GHCR
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: . # Usa o Dockerfile na raiz do repositório
+          push: true # Garante que a imagem seja enviada após o build
+          tags: ${{ steps.meta.outputs.tags }} # Usa as tags geradas no passo anterior (:latest, :commit-sha)
+          labels: ${{ steps.meta.outputs.labels }} # Adiciona labels úteis à imagem
