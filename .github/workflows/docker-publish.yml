@@ -34,8 +34,10 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ secrets.DOCKER_USERNAME }}/abelhinha-v2 # Usamos o username/nome_do_repo
-
+          images: guirbeira/abelhinha-v2
+          tags: |
+            type=raw,value=latest
+            type=sha
       # 4. Constrói a imagem Docker e a envia (push) para o Docker Hub
       - name: Build and push Docker image
         uses: docker/build-push-action@v6

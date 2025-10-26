@@ -281,9 +281,6 @@ async function executarRegistrar(sock, info, args, text) { // args não é mais 
     }
 }
 
-/**
- * Lógica do comando !andamento (Filtro por Missão Atual)
- */
 async function executarAndamento(sock, info, args) {
     const from = info.key.remoteJid;
     const subComando = args[0]?.toLowerCase();
@@ -401,6 +398,7 @@ async function executarAndamento(sock, info, args) {
         await sock.sendMessage(from, { text: `❌ Ocorreu um erro interno no comando !andamento.` }, { quoted: info });
     }
 }
+
 
 /**
  * Lógica do comando !exportar
