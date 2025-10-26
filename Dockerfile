@@ -16,7 +16,7 @@ COPY package.json package-lock.json* ./
 # 4. Instala as dependências de produção
 # 'npm ci' é mais rápido e seguro para builds, usando o package-lock.json.
 # '--only=production' ignora devDependencies que não são necessárias no container final.
-RUN npm ci --only=production
+RUN npm ci --omit=dev
 
 # 5. Copia o RESTANTE do código da aplicação para o diretório de trabalho (/app)
 # Certifique-se de ter um arquivo .dockerignore bem configurado!
