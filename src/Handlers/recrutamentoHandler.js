@@ -399,7 +399,6 @@ async function executarAndamento(sock, info, args) {
     }
 }
 
-
 /**
  * Lógica do comando !exportar
  * Envia arquivos .vcf separados por clã, com filtro de data opcional.
@@ -462,8 +461,6 @@ async function executarExportarContatos(sock, info, args) {
 
             await sock.sendMessage(from, { text: `🔍 Filtrando exportação para o período: ${periodoStr}...`}, { quoted: info });
         }
-        // --- FIM DA NOVA LÓGICA ---
-
 
         // --- 1. Agrupar Fichas (filtradas ou não) por Clã ---
         const fichasPorCla = {};
@@ -484,7 +481,7 @@ async function executarExportarContatos(sock, info, args) {
         await sock.sendMessage(from, { text: `ℹ️ Encontrados ${totalClas} clãs com fichas ${dataInicio ? `no período de ${periodoStr}` : 'no total'}. Preparando arquivos...` }, { quoted: info });
 
         // --- 2. Preparar Diretório Temporário ---
-        const tempDir = path.join(__dirname, '..', '..', 'temp');
+        const tempDir = '/app/temp';
         if (!fs.existsSync(tempDir)) { fs.mkdirSync(tempDir); }
 
         let arquivosEnviados = 0;
@@ -532,7 +529,6 @@ async function executarExportarContatos(sock, info, args) {
     }
 }
 
-// --- FUNÇÃO DE MENU ATUALIZADA ---
 /**
  * Exibe o menu de ajuda com os comandos do módulo de recrutamento.
  */
@@ -607,7 +603,6 @@ async function executarMenuAdmin(sock, info, args) {
         } catch (e2) {}
     }
 }
-// --- FIM DA FUNÇÃO ATUALIZADA ---
 
 // Exporta o handler principal que o messageRouter vai chamar
 module.exports = { handlerRecrutamento };
