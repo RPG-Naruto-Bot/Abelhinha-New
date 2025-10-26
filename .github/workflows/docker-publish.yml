@@ -1,50 +1,46 @@
 # Arquivo: .github/workflows/docker-publish.yml
-# Workflow do GitHub Actions para construir a imagem Docker e publicá-la no GHCR
+# Objetivo: Construir e publicar a imagem no DOCKER HUB (docker.io)
 
-name: Docker Build and Push # Nome do Workflow (aparece na aba Actions do GitHub)
+name: Docker Build and Push to Docker Hub
 
 # Gatilho: Executa este workflow sempre que houver um push na branch 'main'
 on:
   push:
-    branches: [ main ] # Gatilho ativado apenas para a branch 'main'
+    branches: [ main ]
 
-# Permissões: Garante que o job tenha permissão para escrever no GHCR
+# Permissões: (Simplificadas para Docker Hub)
 permissions:
   contents: read
-  packages: write
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest # Usa a versão mais recente do Ubuntu nos runners do GitHub
+    runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout do Código: Baixa o código da branch 'main' para o runner
+      # 1. Checkout do Código
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Login no GitHub Container Registry (GHCR)
-      # Usa o token GITHUB_TOKEN gerado automaticamente pelo Actions,
-      # que tem permissão para escrever pacotes no repositório/organização.
-      - name: Log in to the Container registry
+      # 2. Login no Docker Hub (Usando o novo segredo)
+      - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }} # Seu nome de usuário GitHub
-          password: ${{ secrets.GITHUB_TOKEN }} # Token automático do Actions
+          username: ${{ secrets.DOCKER_USERNAME }} # Seu username do Docker Hub
+          password: ${{ secrets.DOCKER_PASSWORD }} # Sua senha/PAT do Docker Hub
 
-      # 3. Extrai metadados (tags) para a imagem Docker
-      # Cria tags como :latest e uma tag baseada no SHA do commit (bom para rastreabilidade)
+      # 3. Define as Tags (Agora para o Docker Hub)
+      # Repository: Será o seu username do Docker Hub
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository }} # Usa o nome do repositório automaticamente (ex: ghcr.io/RPG-Naruto-Bot/Abelhinha-New)
+          images: ${{ secrets.DOCKER_USERNAME }}/abelhinha-v2 # Usamos o username/nome_do_repo
 
-      # 4. Constrói a imagem Docker e a envia (push) para o GHCR
+      # 4. Constrói a imagem Docker e a envia (push) para o Docker Hub
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
-          context: . # Usa o Dockerfile na raiz do repositório
-          push: true # Garante que a imagem seja enviada após o build
-          tags: ${{ steps.meta.outputs.tags }} # Usa as tags geradas no passo anterior (:latest, :commit-sha)
-          labels: ${{ steps.meta.outputs.labels }} # Adiciona labels úteis à imagem
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
