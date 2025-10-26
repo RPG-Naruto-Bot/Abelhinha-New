@@ -1,0 +1,10 @@
+node_modules
+
+.env
+
+# Banco de Dados SQLite (NUNCA commitar dados)
+data/recrutas.db
+data/recrutas.db-journal # Arquivo temporário do SQLite
+
+# Opcional: Ignorar pasta de scripts se não quiser versioná-los
+# scripts/

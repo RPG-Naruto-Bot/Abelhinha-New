@@ -1,0 +1,70 @@
+Plano de Projeto Scrum: Reconstrução do Bot v2.0
+Projeto: Reescrita modular do bot de WhatsApp do RPG.
+Data de Início: 13 de Outubro de 2025
+1. Equipe Scrum e Papéis
+Product Owner (Dono do Produto): Gui
+Responsabilidades: Define as funcionalidades (o "o quê"), prioriza o Product Backlog e garante que o desenvolvimento agregue valor ao RPG. É a ponte entre a equipe e os "clientes" (jogadores/liderança).
+Scrum Master (Mestre Scrum): Gui
+Responsabilidades: Garante que a equipe siga a metodologia Scrum, remove impedimentos, facilita as reuniões (cerimônias) e protege o time de interrupções externas.
+Development Team (Time de Desenvolvimento): Erick, Narum, Angelo, Júpiter, Ky
+Responsabilidades: Time auto-organizável que transforma os itens do Backlog em um incremento funcional do bot a cada Sprint.
+2. Product Backlog (Definição Concreta dos Módulos)
+Esta é a lista priorizada de tudo que o bot precisa ter. Itens de maior prioridade estão no topo.
+Épico 1: Fundação da Plataforma (Prioridade Máxima)
+História 1.1: Como Time de Desenvolvimento, nós precisamos de um repositório versionado e protegido no GitHub para que possamos colaborar de forma segura e organizada.
+História 1.2: Como Bot, eu preciso de um núcleo de conexão com o WhatsApp (Baileys) para que eu possa ouvir e responder mensagens.
+História 1.3: Como Arquiteto, eu preciso de um Handler de Comandos modular para que o bot possa carregar e executar comandos de forma isolada e escalável.
+História 1.4: Como Desenvolvedor, eu preciso de um Utilitário de Banco de Dados (JSON) para que os comandos possam ler e salvar dados de forma padronizada e segura.
+Épico 2: Módulo de Recrutamento - MVP (Alta Prioridade)
+História 2.1: Como Admin, eu preciso que comandos de recrutamento sejam restritos a grupos específicos (whitelist) para garantir o controle e que o salvamento de recrutas não funcione em qualquer grupo.
+História 2.2: Como organizador, eu quero usar o comando /registrar <número de celular>, respondendo a ficha do jogador para que seja salvo o contato.
+História 2.3: Como organizador, eu quero usar o comando "/andamento clas" para que eu possa ver a contagem de membros em cada clã e entender a distribuição de forças.
+História 2.3: Como organizador, eu quero usar o comando "/andamento players" para que eu possa ver a quantidade de recrutas realizada por cada player seguindo o mesmo modelo de representação dos resultados das missões.
+História 2.4: Como Admin, eu quero um comando /groupid para que eu possa facilmente identificar o ID dos grupos e adicioná-los à whitelist de configuração.
+História 2.5: Como Time de Desenvolvimento, nós precisamos de uma documentação funcional clara para os comandos do MVP para que todos entendam o comportamento esperado.
+
+3. Cronograma de Sprints (Funções e Prazos)
+Cada Sprint terá a duração de 1 semana, um formato ideal para manter o ritmo e o engajamento de uma equipe voluntária.
+Sprint 0: Fundação e Planejamento
+Duração: 1 Semana (13/Out a 19/Out)
+Meta da Sprint: Estabelecer toda a infraestrutura de desenvolvimento e documentação (Épico 1) para que o time possa começar a desenvolver funcionalidades no próximo Sprint.
+Itens do Backlog para o Sprint: Histórias 1.1, 1.2, 1.3, 1.4 e 2.5.
+Cerimônias:
+Sprint Planning: Segunda-feira, 13/Out.
+Daily Scrums: Mensagem diária assíncrona (Discord/WhatsApp).
+Sprint Review & Retrospective: Domingo, 19/Out.
+Funções e Tarefas:
+
+Gui: Codificar as Histórias 1.2, 1.3, 1.4. Executar a 1.1.
+Angelo, Júpiter, Ky: Trabalhar na História 2.5 (Documentação).
+Erick, Narum: Estudar a arquitetura e auxiliar na revisão da documentação.
+Sprint 1: Desenvolvimento do Recrutamento (Parte 1)
+Duração: 1 Semana (20/Out a 26/Out)
+Meta da Sprint: Entregar um incremento funcional contendo o comando /registrar, incluindo a lógica de permissão de grupo.
+Itens do Backlog para o Sprint: Histórias 2.1 e 2.2.
+Cerimônias: Planning (20/Out), Review/Retro (26/Out).
+
+Funções e Tarefas:
+Narum/Erick: Desenvolver as histórias, trabalhando em par ou individualmente.
+Gui: Scrum Master, revisor de código e suporte técnico.
+Angelo, Júpiter, Ky: Começar a escrever os casos de teste para o comando /registrar.
+
+Sprint 2: Desenvolvimento do Recrutamento (Parte 2)
+Duração: 1 Semana (27/Out a 02/Nov)
+Meta da Sprint: Finalizar o MVP com a entrega dos comandos /clas e /groupid.
+Itens do Backlog para o Sprint: Histórias 2.3 e 2.4.
+Cerimônias: Planning (27/Out), Review/Retro (02/Nov).
+
+Funções e Tarefas:
+Narum/Erick: Desenvolver as histórias.
+Angelo, Júpiter, Ky: Testar os comandos desenvolvidos no Sprint anterior e escrever casos de teste para os novos.
+
+Sprint 3: Testes, Refatoração e Lançamento
+Duração: 1 Semana (03/Nov a 09/Nov)
+Meta da Sprint: Garantir a estabilidade do MVP, corrigir todos os bugs críticos e realizar o lançamento oficial do novo bot.
+Itens do Backlog para o Sprint: Bugs reportados, tarefas de deploy.
+Cerimônias: Planning (03/Nov), Review/Retro (09/Nov).
+Funções e Tarefas:
+Angelo, Júpiter, Ky: Executar todos os casos de teste e reportar bugs.
+Narum/Erick: Foco total na correção de bugs.
+Gui: Gerenciar o processo e realizar o deploy.
