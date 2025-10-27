@@ -24,11 +24,20 @@ jobs:
       - name: Set Docker tags
         id: docker-tags
         run: |
-          echo "COMMIT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-          echo "BRANCH_TAG=$(echo $GITHUB_REF_NAME | tr / -)" >> $GITHUB_ENV
+          # Pega o commit curto
+          COMMIT_SHA=$(git rev-parse --short HEAD)
+          # Pega a branch sem refs/heads/
+          BRANCH_TAG=$(echo "${GITHUB_REF_NAME}" | tr / -)
+          # fallback se algo der errado
+          COMMIT_SHA=${COMMIT_SHA:-unknown}
+          BRANCH_TAG=${BRANCH_TAG:-unknown}
+          # Exporta para env do Actions
+          echo "COMMIT_SHA=$COMMIT_SHA" >> $GITHUB_ENV
+          echo "BRANCH_TAG=$BRANCH_TAG" >> $GITHUB_ENV
+          # Define todas as tags separadas por vírgula
           echo "DOCKER_TAGS=guirbeira/abelhinha-v2:latest,guirbeira/abelhinha-v2:${COMMIT_SHA},guirbeira/abelhinha-v2:${BRANCH_TAG}" >> $GITHUB_ENV
 
-      # 4️⃣ Build e push
+      # 4️⃣ Build e push usando todas as tags
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
