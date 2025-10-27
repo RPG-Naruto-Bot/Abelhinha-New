@@ -38,21 +38,16 @@ function startBot() {
 
                 if (qr) {
                     console.log('====================================');
-                    console.log('⚠️ ATENÇÃO: A string abaixo PROVAVELMENTE NÃO é um QR Code válido para pareamento.');
-                    console.log('Tentando exibir como QR Code (versão completa):');
-                    
                     try {
                         qrcode.generate(qr, {small:true}); 
                     } catch (err) {
                         console.error('Erro ao gerar QR Code:', err);
-                        console.log('String recebida (não pôde ser convertida em QR):', qr);
                     }
-                    
                     console.log('====================================');
                 }
                 if (connection === 'open') {
                     console.log('✅ Conectado ao WhatsApp com sucesso!');
-                    console.log("Versão 2.1.11 - Teste Watchtower")
+                    console.log("Versão 2.1.18 - Teste Watchtower")
                 }
 
                 if (connection === 'close') {
