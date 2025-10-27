@@ -1,32 +1,26 @@
-# Arquivo .dockerignore para Abelinha-V2
-
-# Ignora dependências locais (serão instaladas DENTRO do container)
+# Dependências locais (instaladas dentro do container)
 node_modules
 
-# Ignora o diretório do Git
+# Git e arquivos temporários
 .git
-
-# Ignora variáveis de ambiente locais (serão injetadas no container)
-.env
-
-# Ignora dados persistentes locais (serão montados como volumes)
-auth_info_baileys
-data
-temp
-
-# Ignora logs locais (se houver)
+.gitignore
+.vscode/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Ignora arquivos de configuração do Docker
+# Arquivos sensíveis e de ambiente
+.env
+
+# Pastas que serão persistidas via volumes (não devem ir pro build)
+auth_info_baileys
+data
+temp
+logs
+
+# Arquivos de configuração e docs que não influenciam o build
 Dockerfile
 .dockerignore
-
-# Outros arquivos específicos do seu ambiente (ex: config do VSCode)
-.vscode/
-
 *.md
 *.txt
-.gitignore
