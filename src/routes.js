@@ -5,7 +5,7 @@
  */
 
 // 1. Importa o handler que contém TODA a lógica de recrutamento
-const { handlerRecrutamento } = require('./Handlers/recrutamentoHandler.js');
+const { handlerRecrutamento } = require('./handlers/recrutamentoHandler.js');
 const { handlerDIJ } = require('./handlers/dijHandler.js');
 
 // Importa o parser (necessário para a detecção)
