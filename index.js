@@ -10,7 +10,10 @@ const {
 const pino = require('pino');
 
 const qrcode = require('qrcode-terminal');
-const { routeMessage } = require('./messageRouter.js');
+const { routeMessage } = require('./messageRouter');
+
+// Dentro de index.js, no topo:
+const { startAPIServer } = require('./src/handlers/api_server');
 
 function startBot() {
     let connecting = false;
@@ -47,7 +50,7 @@ function startBot() {
                 }
                 if (connection === 'open') {
                     console.log('✅ Conectado ao WhatsApp com sucesso!');
-                    console.log("Versão 2.1.18 - Teste Watchtower")
+                    console.log("Versão 2.2 - Teste Watchtower")
                 }
 
                 if (connection === 'close') {
@@ -101,3 +104,4 @@ function startBot() {
 }
 
 startBot();
+startAPIServer();

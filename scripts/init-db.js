@@ -11,7 +11,7 @@ const path = require('path');
 // Caminho para o diretório 'data' (assumindo que 'scripts' está na raiz)
 const dataDir = path.join(__dirname, '..', 'data');
 // Caminho para o arquivo do banco de dados
-const dbPath = path.join(dataDir, 'recrutas.db'); // <<< Arquivo .db agora
+const dbPath = path.join(dataDir, 'rpg_data.db'); // <<< Arquivo .db agora
 
 // Garante que a pasta 'data' exista
 try {

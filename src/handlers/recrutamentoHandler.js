@@ -17,6 +17,7 @@
 const parser = require('../../utils/parser.js');
 const db = require('../../utils/database.js');
 const config = require('../configs/ids-groups.json');
+const { checkAdmin } = require('../../utils/common.js')
 
 // Importa libs
 const moment = require('moment-timezone');
@@ -36,40 +37,6 @@ function gerarVCardFallback(nome, numero) {
     return lines.join('\n');
 }
 // --- Fim gerarVCardFallback ---
-
-
-// --- Funções Auxiliares (Mockups) ---
-// --- Função checkAdmin ATUALIZADA com Logs ---
-const checkAdmin = async (sock, msg) => {
-    const groupId = msg.key.remoteJid;
-    // Garante que só execute em grupos
-    if (!groupId || !groupId.endsWith('@g.us')) {
-        return false;
-    }
-
-    const senderJid = msg.key.participant || msg.key.remoteJid; // Quem enviou
-
-    try {
-        // Busca os metadados do grupo
-        const groupMetadata = await sock.groupMetadata(groupId);
-        
-        // Encontra as informações do participante específico
-        const participantInfo = groupMetadata.participants.find(p => p.id === senderJid);
-
-        if (!participantInfo) {
-            return false; // Se não achou o participante, não pode ser admin
-        }
-
-        // A lógica de verificação (padrão Baileys)
-        const isAdmin = participantInfo.admin === 'admin' || participantInfo.admin === 'superadmin';        
-        return isAdmin; // Retorna true se for 'admin' ou 'superadmin', false caso contrário (incluindo null/undefined)
-
-    } catch (e) {
-        // Se der erro (ex: bot não está mais no grupo, API mudou), assume que não é admin
-        return false;
-    }
-};
-// --- Fim da função checkAdmin ---
 
 /**
  * O Handler Principal de Recrutamento
@@ -281,110 +248,126 @@ async function executarRegistrar(sock, info, args, text) { // args não é mais 
     }
 }
 
+/**
+ * Lógica do comando !andamento (Final e Robusto)
+ * Filtra dados por Missão Atual, Última Missão ou Período Específico.
+ */
 async function executarAndamento(sock, info, args) {
     const from = info.key.remoteJid;
     const subComando = args[0]?.toLowerCase();
 
     try {
         const isAdmin = await checkAdmin(sock, info);
-        if (!isAdmin) { /* ... (erro admin) ... */ return; }
+        if (!isAdmin) {
+            await sock.sendMessage(from, { text: '⚠ Apenas administradores podem usar este comando.' }, { quoted: info });
+            return;
+        }
 
-        // --- LÓGICA DE DEFINIÇÃO DO PERÍODO DA MISSÃO ---
+        // --- Variáveis de Período ---
         const now = moment().tz('America/Sao_Paulo');
         const dayOfWeek = now.isoWeekday(); // 1 (Segunda) a 7 (Domingo)
 
-        let startOfPeriod, endOfPeriod, missionPeriodStr;
+        let startOfPeriod, endOfPeriod, periodTitle;
+        const dateRangeArg = args[1]; // Opcional: filtro de data específica
 
-        if (dayOfWeek >= 1 && dayOfWeek <= 2) { // Segunda ou Terça -> Período Seg-Ter
-            startOfPeriod = now.clone().isoWeekday(1).startOf('day'); // Vai para a Segunda 00:00
-            endOfPeriod = now.clone().isoWeekday(2).endOf('day');   // Vai para a Terça 23:59:59
-            missionPeriodStr = `Missão Atual (Seg-Ter)`;
-        } else if (dayOfWeek >= 4 && dayOfWeek <= 5) { // Quinta ou Sexta -> Período Qui-Sex
-            startOfPeriod = now.clone().isoWeekday(4).startOf('day'); // Vai para a Quinta 00:00
-            endOfPeriod = now.clone().isoWeekday(5).endOf('day');   // Vai para a Sexta 23:59:59
-            missionPeriodStr = `Missão Atual (Qui-Sex)`;
-        } else {
-            // Quarta, Sábado ou Domingo -> Mostra o período da ÚLTIMA missão concluída
-            if (dayOfWeek === 3) { // Quarta -> Mostra Seg-Ter anterior
-                 startOfPeriod = now.clone().isoWeekday(1).startOf('day');
-                 endOfPeriod = now.clone().isoWeekday(2).endOf('day');
-                 missionPeriodStr = `Última Missão (Seg-Ter)`;
-            } else { // Sábado ou Domingo -> Mostra Qui-Sex anterior
-                 startOfPeriod = now.clone().isoWeekday(4).startOf('day');
-                 endOfPeriod = now.clone().isoWeekday(5).endOf('day');
-                 missionPeriodStr = `Última Missão (Qui-Sex)`;
+        // 1. Cenário: Data Específica Fornecida (Prioridade 1)
+        if (dateRangeArg && dateRangeArg.includes('-') && dateRangeArg.match(/^\d{2}\/\d{2}\/\d{4}-\d{2}\/\d{2}\/\d{4}$/)) {
+            const [inicioStr, fimStr] = dateRangeArg.split('-');
+            startOfPeriod = moment.tz(inicioStr, "DD/MM/YYYY", "America/Sao_Paulo").startOf('day');
+            endOfPeriod = moment.tz(fimStr, "DD/MM/YYYY", "America/Sao_Paulo").endOf('day');
+
+            if (!startOfPeriod.isValid() || !endOfPeriod.isValid() || startOfPeriod.isAfter(endOfPeriod)) {
+                await sock.sendMessage(from, { text: '⚠ Formato de data inválido ou data de início posterior à data de fim. Use DD/MM/YYYY-DD/MM/YYYY.' }, { quoted: info });
+                return;
             }
-             // Ajuste para garantir que estamos pegando a semana correta se já passou o dia
-             if (now.isBefore(startOfPeriod)) {
-                 // Ex: Se hoje é Domingo e startOfPeriod é Quinta da *próxima* semana
-                 // precisamos subtrair 7 dias para pegar a Quinta *passada*.
-                 // Isso não deve acontecer com isoWeekday, mas é uma segurança.
-                 // UPDATE: A lógica padrão do isoWeekday já deve lidar com isso corretamente.
-                 // Se hoje é Domingo (7), isoWeekday(4) vai para a Quinta da mesma semana.
-             }
+            periodTitle = `Período Específico (${startOfPeriod.format('DD/MM/YY')} a ${endOfPeriod.format('DD/MM/YY')})`;
+        } else {
+            // 2. Cenário: Lógica da Missão Semanal (FALLBACK)
+            
+            if (dayOfWeek >= 1 && dayOfWeek <= 2) { // Segunda ou Terça -> Missão Atual
+                startOfPeriod = now.clone().isoWeekday(1).startOf('day');
+                endOfPeriod = now.clone().isoWeekday(2).endOf('day');
+                periodTitle = `Missão Atual (Seg-Ter - ${startOfPeriod.format('DD/MM')} a ${endOfPeriod.format('DD/MM')})`;
+            } else if (dayOfWeek >= 4 && dayOfWeek <= 5) { // Quinta ou Sexta -> Missão Atual
+                startOfPeriod = now.clone().isoWeekday(4).startOf('day');
+                endOfPeriod = now.clone().isoWeekday(5).endOf('day');
+                periodTitle = `Missão Atual (Qui-Sex - ${startOfPeriod.format('DD/MM')} a ${endOfPeriod.format('DD/MM')})`;
+            } else { 
+                // 3. Cenário: Dias de Folga/Transição (Sábado, Domingo, Quarta) -> Última Missão
+                let targetDayStart = dayOfWeek === 3 ? 1 : 4; // 1=Seg ou 4=Qui
+                let targetDayEnd = dayOfWeek === 3 ? 2 : 5;   // 2=Ter ou 5=Sex
+                let basePeriodName = dayOfWeek === 3 ? 'Seg-Ter' : 'Qui-Sex';
+                
+                startOfPeriod = now.clone().isoWeekday(targetDayStart).startOf('day');
+                endOfPeriod = now.clone().isoWeekday(targetDayEnd).endOf('day');
+
+                // --- CORREÇÃO FINAL: Garante que a data seja da semana passada ---
+                // Se o período calculado está no futuro (comparado a AGORA),
+                // ou se estamos em um dia de folga, subtraímos 7 dias.
+                // O mais seguro é assumir que fora do período ativo (Seg-Ter, Qui-Sex),
+                // olhamos para a semana anterior.
+                // Ajuste: A lógica correta é subtrair 7 dias se o dia atual for FORA da janela de missão.
+                if (dayOfWeek === 3 || dayOfWeek === 6 || dayOfWeek === 7) { 
+                    startOfPeriod.subtract(7, 'days');
+                    endOfPeriod.subtract(7, 'days');
+                }
+                
+                periodTitle = `Última Missão (${basePeriodName} - ${startOfPeriod.format('DD/MM')} a ${endOfPeriod.format('DD/MM')})`;
+            }
         }
 
         const startTimestamp = startOfPeriod.valueOf();
         const endTimestamp = endOfPeriod.valueOf();
-        const periodoExibicao = `${startOfPeriod.format('DD/MM')} a ${endOfPeriod.format('DD/MM')}`;
-
-        console.log(`[Andamento] Período calculado: ${missionPeriodStr} (${periodoExibicao})`);
-        // --- FIM DA LÓGICA DE PERÍODO ---
+        
+        console.log(`[Andamento] Período calculado: ${periodTitle}`);
 
 
         // --- BUSCA NO BANCO DE DADOS (COM FILTRO) ---
-        // Chama a nova função do DB passando os timestamps
-        const fichasArray = await db.getFichasByTimestamp(startTimestamp, endTimestamp); // Retorna ARRAY
+        const fichasArray = await db.getFichasByTimestamp(startTimestamp, endTimestamp); 
         // --- FIM DA BUSCA ---
 
         // Validação se encontrou fichas NO PERÍODO
         if (!fichasArray || fichasArray.length === 0) {
-            await sock.sendMessage(from, { text: `ℹ️ Nenhuma ficha encontrada para a ${missionPeriodStr} (${periodoExibicao}).` }, { quoted: info });
+            await sock.sendMessage(from, { text: `ℹ️ Nenhuma ficha encontrada para o período selecionado (${periodTitle}).` }, { quoted: info });
             return;
         }
 
-        // --- Processamento (Clas ou Players) ---
-        // A lógica de contagem agora opera diretamente no 'fichasArray' filtrado
+        // --- Processamento e Exibição ---
         if (subComando === 'clas') {
             const contagem = {};
-            // --- CORREÇÃO: Loop de Contagem ---
+            // --- Loop de Contagem ---
             for (const ficha of fichasArray) {
                 const cla = ficha.cla || 'Sem Clã';
                 contagem[cla] = (contagem[cla] || 0) + 1;
             }
-            // --- FIM DA CORREÇÃO ---
 
-            let resposta = `📊 *Andamento por Clã (${missionPeriodStr} - ${periodoExibicao})*\n\n`;
+            let resposta = `📊 *Andamento por Clã (${periodTitle})*\n\n`;
             const clasOrdenados = Object.entries(contagem).sort(([, a], [, b]) => b - a);
 
-            // --- CORREÇÃO: Loop de Formatação ---
+            // --- Loop de Formatação ---
             for (const [cla, total] of clasOrdenados) {
-                const emoji = fichasArray.find(f => f.cla === cla)?.emojiCla || '❓';
+                const emoji = fichasArray.find(f => fichasArray.find(f => f.cla === cla))?.emojiCla || '❓';
                 resposta += `${emoji} *${cla}:* ${total} recrutas\n`;
             }
-            // --- FIM DA CORREÇÃO ---
 
             resposta += `\n*Total no Período:* ${fichasArray.length} fichas.`;
             await sock.sendMessage(from, { text: resposta }, { quoted: info });
 
         } else if (subComando === 'players') {
             const contagemPorRecrutador = {};
-            // --- CORREÇÃO: Loop de Contagem ---
+            // --- Loop de Contagem ---
             for (const ficha of fichasArray) {
                 const recrutadorNome = ficha.recrutadoPorTexto || 'Não Informado';
                 contagemPorRecrutador[recrutadorNome] = (contagemPorRecrutador[recrutadorNome] || 0) + 1;
             }
-            // --- FIM DA CORREÇÃO ---
 
-            let resposta = `📈 *Recrutamento por Player (${missionPeriodStr} - ${periodoExibicao})*\n_(Quem indicou o recruta)_\n\n`;
-            const recrutadoresOrdenados = Object.entries(contagemPorRecrutador)
-                .sort(([, a], [, b]) => b - a);
+            let resposta = `📈 *Recrutamento por Player (${periodTitle})*\n_(Quem indicou o recruta)_\n\n`;
+            const recrutadoresOrdenados = Object.entries(contagemPorRecrutador).sort(([, a], [, b]) => b - a);
 
-            // --- CORREÇÃO: Loop de Formatação ---
+            // --- Loop de Formatação ---
             for (const [nomeRecrutador, total] of recrutadoresOrdenados) {
                 resposta += `👥 *${nomeRecrutador}:* ${total} recrutas\n`;
             }
-            // --- FIM DA CORREÇÃO ---
 
             resposta += `\n*Total no Período:* ${fichasArray.length} fichas.`;
             await sock.sendMessage(from, { text: resposta }, { quoted: info });

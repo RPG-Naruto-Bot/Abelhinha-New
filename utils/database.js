@@ -1,19 +1,40 @@
 /*
- * ARQUIVO: Utils/database.js
- * * Responsabilidade: Isolar toda a interação com o banco de dados SQLite.
+ * ARQUIVO: src/Utils/database.js
+ * * Responsabilidade: Isolar toda a interação com o banco de dados SQLite (DAL).
  *
- * v2.1 - Migração para SQLite concluída
- * - Refatorada a função saveFicha() para usar INSERT OR REPLACE.
- * - Refatorada a função getAllFichas() para usar SQLite.
+ * v2.2 - Migração para SQLite finalizada
+ * - Adicionada função saveMissaoBruta para o módulo DIJ.
  */
-const fs = require('fs')
+
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
-const moment = require('moment-timezone'); // Precisamos dele de volta
+const moment = require('moment-timezone');
+const fs = require('fs'); // Necessário para initDatabase
 
-// Caminho para o banco de dados SQLite
-const dataDir = '/app/data'; // Caminho que mapeamos no 'docker run -v'
-const dbPath = path.join(dataDir, 'recrutas.db');
+// --- Configuração do Caminho do DB ---
+// Sobe um nível de 'Utils/' para chegar na raiz 'Abelinha-v2/'
+const projectRootDir = path.join(__dirname, '..');
+const dataDir = path.join(projectRootDir, 'data');
+
+// Define o arquivo do banco de dados SQLite
+const dbPath = path.join(dataDir, 'rpg_data.db'); // Nome correto do arquivo
+
+/**
+ * Garante que o diretório 'data' exista. 
+ * A criação da tabela é feita externamente via scripts/init-db.js.
+ */
+function initDatabaseDir() {
+    try {
+        if (!fs.existsSync(dataDir)) {
+            fs.mkdirSync(dataDir, { recursive: true });
+        }
+    } catch (e) {
+        console.error("ERRO CRÍTICO ao inicializar o diretório 'data':", e);
+    }
+}
+initDatabaseDir(); // Executa a inicialização do diretório
+
+// --- Funções de Leitura ---
 
 /**
  * Lê todas as fichas do banco de dados SQLite.
@@ -29,9 +50,7 @@ function getAllFichas() {
         });
         const sql = `SELECT * FROM fichas`;
         db.all(sql, [], (err, rows) => {
-            db.close((closeErr) => {
-                if (closeErr) { console.error('[DB][getAllFichas] Erro ao fechar conexão:', closeErr.message); }
-            });
+            db.close((closeErr) => { /* ... */ });
             if (err) {
                 console.error('[DB][getAllFichas] Erro ao executar SELECT:', err.message);
                 return resolve({});
@@ -47,69 +66,56 @@ function getAllFichas() {
 
 /**
  * Busca fichas dentro de um intervalo de datas (timestamp).
- * @param {number} startTimestamp Timestamp inicial (milissegundos UNIX).
- * @param {number} endTimestamp Timestamp final (milissegundos UNIX).
- * @returns {Promise<Array<object>>} Uma Promise que resolve com um ARRAY
- * contendo os objetos das fichas encontradas no período. Retorna array vazio em caso de erro.
+ * @returns {Promise<Array<object>>} Retorna array de objetos.
  */
 function getFichasByTimestamp(startTimestamp, endTimestamp) {
     return new Promise((resolve, reject) => {
         const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READONLY, (err) => {
             if (err) {
                 console.error('[DB][getByTimestamp] Erro ao conectar:', err.message);
-                return resolve([]); // Retorna array vazio
+                return resolve([]);
             }
         });
 
         const sql = `
             SELECT * FROM fichas
             WHERE timestamp >= ? AND timestamp <= ?
-            ORDER BY timestamp ASC; -- Opcional: ordenar por data
+            ORDER BY timestamp ASC;
         `;
         const params = [startTimestamp, endTimestamp];
-
-        // db.all retorna um array de resultados
         db.all(sql, params, (err, rows) => {
-            db.close((closeErr) => { /* ... (log erro close) ... */ });
+            db.close((closeErr) => { /* ... */ });
             if (err) {
                 console.error('[DB][getByTimestamp] Erro ao executar SELECT:', err.message);
-                return resolve([]); // Retorna array vazio
+                return resolve([]);
             }
-            // Resolve diretamente com o ARRAY retornado pelo SQLite
             resolve(rows || []);
         });
     });
 }
 
-// --- FUNÇÃO REESCRITA: saveFicha() ---
+// --- Funções de Escrita ---
+
 /**
- * Salva (ou atualiza se já existir) uma ficha no banco de dados SQLite.
- * @param {string} targetJid O JID do recruta (ex: 5544...@s.whatsapp.net)
- * @param {object} dadosFicha Objeto contendo { nome, cla, emojiCla, recrutadoPorTexto, registradoPorJid, data }
- * @returns {Promise<void>} Uma Promise que resolve quando a operação termina ou rejeita em caso de erro.
+ * Salva (ou atualiza) uma ficha na tabela 'fichas'.
+ * @returns {Promise<void>}
  */
 function saveFicha(targetJid, dadosFicha) {
-    // Retorna uma Promise para lidar com a operação assíncrona
     return new Promise((resolve, reject) => {
-        // 1. Gera os campos calculados (timestamp, displayName, vCard)
-        const timestamp = Date.now(); // Timestamp atual em milissegundos
-        // Usa a data fornecida OU a data atual formatada
+        const timestamp = Date.now();
         const dataFormatada = dadosFicha.data || moment(timestamp).tz('America/Sao_Paulo').format('DD/MM/YYYY');
         const emojiDisplay = dadosFicha.emojiCla ? `${dadosFicha.emojiCla} ` : '';
         const displayName = `📚 ${emojiDisplay}${dadosFicha.nome} ${dadosFicha.cla} ${dataFormatada}`.trim().replace(/\s+/g, ' ');
         const waid = targetJid.split('@')[0];
         const vcard = `BEGIN:VCARD\nVERSION:3.0\nN:;${displayName};;;\nFN:${displayName}\nitem1.TEL;waid=${waid}:${waid}\nitem1.X-ABLabel:Ponsel\nEND:VCARD`;
 
-        // 2. Conecta ao banco de dados (modo leitura/escrita)
         const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE, (err) => {
             if (err) {
                 console.error('[DB][saveFicha] Erro ao conectar ao SQLite:', err.message);
-                return reject(new Error(`Erro ao conectar ao DB: ${err.message}`)); // Rejeita a Promise
+                return reject(new Error(`Erro ao conectar ao DB: ${err.message}`));
             }
         });
 
-        // 3. Define o SQL com INSERT OR REPLACE e placeholders (?)
-        // 'INSERT OR REPLACE' garante que se o JID (PRIMARY KEY) já existir, a linha inteira será atualizada.
         const sql = `
             INSERT OR REPLACE INTO fichas (
                 jid, nome, cla, emojiCla, recrutadoPorTexto,
@@ -117,45 +123,96 @@ function saveFicha(targetJid, dadosFicha) {
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         `;
 
-        // 4. Array com os parâmetros na ordem correta das colunas e placeholders
         const params = [
-            targetJid, // jid
-            dadosFicha.nome, // nome
-            dadosFicha.cla, // cla
-            dadosFicha.emojiCla || null, // emojiCla (usa null se vazio)
-            dadosFicha.recrutadoPorTexto || 'Não informado', // recrutadoPorTexto
-            dadosFicha.registradoPorJid || null, // registradoPorJid (usa null se vazio)
-            dataFormatada, // data
-            timestamp, // timestamp (INTEGER)
-            vcard, // vcard
-            displayName // displayName
+            targetJid, dadosFicha.nome, dadosFicha.cla, dadosFicha.emojiCla || null,
+            dadosFicha.recrutadoPorTexto || 'Não informado', dadosFicha.registradoPorJid || null,
+            dataFormatada, timestamp, vcard, displayName
         ];
 
-        // 5. Executa o comando
-        db.run(sql, params, function (err) { // Usamos 'function' para ter acesso ao 'this'
-            // Fecha a conexão independentemente do resultado
-            db.close((closeErr) => {
-                if (closeErr) {
-                    console.error('[DB][saveFicha] Erro ao fechar conexão SQLite:', closeErr.message);
-                    // Não rejeita a promise principal por erro no close, mas loga
-                }
-            });
-
+        db.run(sql, params, function (err) {
+            db.close((closeErr) => { /* ... */ });
             if (err) {
                 console.error('[DB][saveFicha] Erro ao executar INSERT OR REPLACE:', err.message);
-                return reject(new Error(`Erro ao salvar no DB: ${err.message}`)); // Rejeita a Promise
+                return reject(new Error(`Erro ao salvar no DB: ${err.message}`));
             }
-
-            // Sucesso!
-            // this.changes indica quantas linhas foram afetadas (1 para INSERT ou REPLACE)
             console.log(`[DB][saveFicha] Ficha salva/atualizada com sucesso para JID: ${targetJid}. Linhas afetadas: ${this.changes}`);
-            resolve(); // Resolve a Promise indicando sucesso
+            resolve();
+        });
+    });
+}
+
+/**
+ * Busca os últimos N resultados brutos de missões salvos.
+ * @returns {Promise<Array<object>>} Uma Promise que resolve com um ARRAY de missões.
+ */
+function getMissoesConcluidas(limit = 50) {
+    return new Promise((resolve, reject) => {
+        const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READONLY, (err) => {
+            if (err) {
+                console.error('[DB][getMissoesConcluidas] Erro ao conectar:', err.message);
+                return resolve([]);
+            }
+        });
+
+        // Seleciona as últimas 50 missões salvas
+        const sql = `
+            SELECT * FROM missoes_concluidas 
+            ORDER BY timestamp DESC
+            LIMIT ?;
+        `;
+        const params = [limit];
+
+        db.all(sql, params, (err, rows) => {
+            db.close();
+            if (err) {
+                console.error('[DB][getMissoesConcluidas] Erro ao executar SELECT:', err.message);
+                return resolve([]);
+            }
+            resolve(rows || []);
+        });
+    });
+}
+// --- FIM DA FUNÇÃO RENOMEADA ---
+
+/**
+ * Salva o texto bruto de uma missão na tabela missoes_concluidas.
+ * @returns {Promise<void>}
+ */
+function saveMissaoConcluida(textoBruto, adminJid) {
+    return new Promise((resolve, reject) => {
+        const timestamp = Date.now();
+        const dataRegistro = moment(timestamp).tz('America/Sao_Paulo').format('DD/MM/YYYY HH:mm:ss');
+
+        const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE, (err) => {
+            if (err) { 
+                console.error('[DB][saveMissaoConcluida] Erro ao conectar ao SQLite:', err.message);
+                return reject(new Error(`Erro ao conectar ao DB: ${err.message}`));
+            }
+        });
+
+        const sql = `
+            INSERT INTO missoes_concluidas (
+                texto_bruto, admin_jid, data_registro, timestamp
+            ) VALUES (?, ?, ?, ?);
+        `;
+        const params = [ textoBruto, adminJid || null, dataRegistro, timestamp ];
+
+        db.run(sql, params, function (err) {
+            db.close();
+            if (err) { 
+                console.error('[DB][saveMissaoConcluida] Erro ao executar INSERT:', err.message);
+                return reject(new Error(`Erro ao salvar missão concluída no DB: ${err.message}`));
+            }
+            console.log(`[DB][saveMissaoConcluida] Missão salva com sucesso. ID: ${this.lastID}`);
+            resolve();
         });
     });
 }
 
 module.exports = {
-    getAllFichas, // Retorna Promise<Objeto>
+    getAllFichas,
     getFichasByTimestamp,
-    saveFicha,   // Retorna Promise<void>
+    saveFicha,
+    saveMissaoConcluida, // <-- Exporta a função com nome novo
+    getMissoesConcluidas // <-- Exporta a função com nome novo
 };
