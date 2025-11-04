@@ -1,46 +1,46 @@
+# Arquivo: .github/workflows/docker-publish.yml
+# Objetivo: Construir e publicar a imagem no DOCKER HUB (docker.io)
+
 name: Docker Build and Push to Docker Hub
 
+# Gatilho: Executa este workflow sempre que houver um push na branch 'main'
 on:
   push:
     branches: [ main ]
+
+# Permissões: (Simplificadas para Docker Hub)
+permissions:
+  contents: read
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout do código
+      # 1. Checkout do Código
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Login no Docker Hub
+      # 2. Login no Docker Hub (Usando o novo segredo)
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
+          username: ${{ secrets.DOCKER_USERNAME }} # <-- Usa o Segredo
+          password: ${{ secrets.DOCKER_PASSWORD }} # (ou DOCKER_TOKEN)
 
-      # 3️⃣ Definir tags da imagem: latest + commit SHA + branch
-      - name: Set Docker tags
-        id: docker-tags
-        run: |
-          # Pega o commit curto
-          COMMIT_SHA=$(git rev-parse --short HEAD)
-          # Pega a branch sem refs/heads/
-          BRANCH_TAG=$(echo "${GITHUB_REF_NAME}" | tr / -)
-          # fallback se algo der errado
-          COMMIT_SHA=${COMMIT_SHA:-unknown}
-          BRANCH_TAG=${BRANCH_TAG:-unknown}
-          # Exporta para env do Actions
-          echo "COMMIT_SHA=$COMMIT_SHA" >> $GITHUB_ENV
-          echo "BRANCH_TAG=$BRANCH_TAG" >> $GITHUB_ENV
-          # Define todas as tags separadas por vírgula
-          echo "DOCKER_TAGS=guirbeira/abelhinha-v2:latest,guirbeira/abelhinha-v2:${COMMIT_SHA},guirbeira/abelhinha-v2:${BRANCH_TAG}" >> $GITHUB_ENV
+      # 3. Define as Tags (Agora para o Docker Hub)
+      # Repository: Será o seu username do Docker Hub
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKER_USERNAME }}/abelhinha-v2 # <-- Usa o Segredo DE NOVO
 
-      # 4️⃣ Build e push usando todas as tags
+      # 4. Constrói a imagem Docker e a envia (push) para o Docker Hub
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
-          tags: ${{ env.DOCKER_TAGS }}
+          tags: ${{ steps.meta.outputs.tags }} # <-- Usa as tags geradas
+          labels: ${{ steps.meta.outputs.labels }}
