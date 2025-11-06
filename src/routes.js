@@ -13,22 +13,6 @@ const parser = require('../utils/parser');
 const config = require('./configs/ids-groups.json');
 
 const commandRoutes = [
-    // Rota de Detecção Automática (Responde Número)
-    {
-        name: 'Detector de Ficha',
-        condition: (msg, remoteJid, text) => {
-            return parser.detectarFicha(text);
-        },
-
-        action: async (sock, msg, text) => {
-            // Ação de Responder o JID/Número
-            const autorJid = msg.key.participant || msg.key.remoteJid;
-            const numeroAutor = autorJid ? autorJid.split('@')[0] : 'desconhecido';
-            await sock.sendMessage(msg.key.remoteJid, {
-                text: `Número do autor da ficha: ${numeroAutor}`
-            });
-        }
-    },
     {
         // --- ROTA DE RECRUTAMENTO (Fichas e Andamento) ---
         name: 'Funcoes de Recrutamento & Ajuda',
