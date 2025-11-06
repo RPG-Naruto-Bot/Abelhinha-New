@@ -18,6 +18,7 @@ const parser = require('../../utils/parser.js');
 const db = require('../../utils/database.js');
 const config = require('../configs/ids-groups.json');
 const { checkAdmin } = require('../../utils/common.js')
+const clasConfig = require('../configs/clas.json');
 
 // Importa libs
 const moment = require('moment-timezone');
