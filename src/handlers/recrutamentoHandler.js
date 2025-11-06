@@ -235,7 +235,7 @@ async function executarRegistrar(sock, info, args, text) { // args não é mais 
         if (autorDaFichaJid) {
             try {
                 await sock.sendMessage(from, { text: `ℹ️ Removendo @${autorDaFichaJid.split('@')[0]} do grupo...`, mentions: [autorDaFichaJid] });
-                //await sock.groupParticipantsUpdate(from, [autorDaFichaJid], 'remove'); // Comentado para testes
+                await sock.groupParticipantsUpdate(from, [autorDaFichaJid], 'remove'); // Comentado para testes
             } catch (e) {
                 console.error('Falha ao remover recruta:', e);
                 await sock.sendMessage(from, { text: `⚠ Falha ao remover @${autorDaFichaJid.split('@')[0]}. Verifique minhas permissões.`, mentions: [autorDaFichaJid] });
