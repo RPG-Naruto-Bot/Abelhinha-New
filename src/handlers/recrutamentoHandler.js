@@ -346,7 +346,7 @@ async function executarAndamento(sock, info, args) {
 
             // --- Loop de Formatação ---
             for (const [cla, total] of clasOrdenados) {
-                const emoji = fichasArray.find(f => fichasArray.find(f => f.cla === cla))?.emojiCla || '❓';
+                const emoji = clasConfig[cla] || '❓';
                 resposta += `${emoji} *${cla}:* ${total} recrutas\n`;
             }
 
