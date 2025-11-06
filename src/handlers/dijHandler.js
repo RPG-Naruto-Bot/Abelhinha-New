@@ -1,18 +1,24 @@
 /*
  * ARQUIVO: src/Handlers/dijHandler.js
  * ...
- * v2.4 - Adicionada a lógica do '!salvarmissao' (Modo Único) de volta
- * ao handler, coexistindo com o Modo de Lote (!iniciarsalvamento).
+ * v2.6 - Refatorado para usar o wrapper 'withAdminPermission' (lógica "lambda")
+ * e a validação por âncoras 🔻/🔺.
  */
 
 const db = require('../../utils/database.js'); 
-const { checkAdmin } = require('../../utils/common.js'); 
-const parser = require('../../utils/parser.js'); // Necessário para o !salvarmissao
+// --- MUDANÇA: Importa o novo wrapper ---
+const { checkAdmin, withAdminPermission } = require('../../utils/common.js'); 
+const parser = require('../../utils/parser.js');
 
 // --- 1. Armazenamento de Estado (Modo de Lote) ---
 const batchSaveMode = new Map();
-const BATCH_TIMEOUT_MS = 5 * 60 * 1000; 
-const MISSION_START_STRING = "千 • Parabéns Para Os Que Concluíram Valendo Jutsu❕"; // Palavra-chave forte para validação
+const BATCH_TIMEOUT_MS = 5 * 60 * 1000;
+
+// --- VALIDAÇÃO POR ÂNCORA (v2.6 - Ideia do Ky) ---
+const MISSION_ANCHOR_1 = "🔻";
+const MISSION_ANCHOR_2 = "🔺";
+// --- FIM ---
+
 
 /**
  * Para o modo de salvamento em lote para um usuário específico.
@@ -30,153 +36,191 @@ function stopBatchSave(sock, from, userJid, reason = "Modo de salvamento encerra
     }
 }
 
-// --- NOVA FUNÇÃO DE VERIFICAÇÃO DE ESTADO ---
 /**
  * Verifica se um usuário específico está no modo de salvamento em lote.
- * @param {string} userJid O JID do usuário (ex: 55...@s.whatsapp.net)
- * @returns {boolean}
  */
 function isUserInBatchMode(userJid) {
     return batchSaveMode.has(userJid);
 }
 
+
 /**
- * O Handler Principal da DIJ (Divisão de Inteligência de Jogo)
- * Processa o modo de lote (batch mode) OU comandos únicos.
+ * O Handler Principal da DIJ
  */
 async function handlerDIJ(sock, msg, text) {
     const from = msg.key.remoteJid;
     const userJid = msg.key.participant || msg.key.remoteJid; 
     const commandName = text.split(' ')[0].toLowerCase();
+    const args = text.split(' ').slice(1);
     
-    // --- 1. Verifica se o USUÁRIO está em Modo de Salvamento em Lote ---
+    // --- 1. Modo de Lote (Batch Mode) ---
     if (batchSaveMode.has(userJid)) {
         
-        // Verifica se é o comando de encerrar
         if (commandName === '!encerrarsalvamento') {
             stopBatchSave(sock, from, userJid, "Salvamento em cascata encerrado manualmente.");
             return;
         }
 
-        // --- Lógica de Salvamento em Lote (como estava) ---
-        const cleanText = text.replace(/\*/g, ''); 
-        const isMissionResult = cleanText.includes(MISSION_START_STRING);
+        // --- VALIDAÇÃO ATUALIZADA (v2.6) ---
+        // Limpa formatação E caracteres invisíveis (incluindo \uFE0F)
+        const cleanText = text.replace(/\*|_|~|`|\0|\u200B|\uFE0F/g, ''); 
+        const isMissionResult = cleanText.includes(MISSION_ANCHOR_1) && 
+                                cleanText.includes(MISSION_ANCHOR_2);
+        // --- FIM DA VALIDAÇÃO ---
 
         if (isMissionResult) {
-            console.log(`[Handler DIJ] Salvando mensagem (validada) em cascata de ${userJid}...`);
             try {
                 await db.saveMissaoConcluida(text, userJid); 
-                await sock.sendMessage(from, { react: { text: '💾', key: msg.key } }); // Salvo
+                await sock.sendMessage(from, { react: { text: '💾', key: msg.key } }); 
             } catch (e) {
                 if (e.message === 'DUPLICATE') {
                     console.warn(`[Handler DIJ] Missão duplicada ignorada (enviada por ${userJid}).`);
-                    await sock.sendMessage(from, { react: { text: '⚠️', key: msg.key } }); // Duplicado
+                    await sock.sendMessage(from, { react: { text: '⚠️', key: msg.key } }); 
                 } else {
                     console.error("[ERRO saveMissaoConcluida]", e);
                     await sock.sendMessage(from, { text: `❌ Erro ao salvar esta missão em cascata. @${userJid.split('@')[0]} ainda está no modo de salvamento.`, mentions: [userJid] }, { quoted: msg });
                 }
             }
         } else {
-            console.log(`[Handler DIJ] Mensagem aleatória ignorada (sem keywords): ${text.substring(0, 20)}...`);
-            await sock.sendMessage(from, { react: { text: '❓', key: msg.key } }); // Ignorado
+            console.log(`[Handler DIJ] Mensagem aleatória ignorada (sem âncora 🔺🔻): ${text.substring(0, 20)}...`);
+            await sock.sendMessage(from, { react: { text: '❓', key: msg.key } }); 
         }
-        return; // Continua no modo de lote
+        return; 
     }
 
-    // --- 2. Se não estiver em modo de lote, verifica os comandos da DIJ ---
+    // --- 2. Comandos Únicos (Agora usam o Wrapper) ---
     
-    // Roteador de Comandos da DIJ
     switch (commandName) {
+        
+        // --- COMANDO !iniciarsalvamento REFATORADO ---
         case '!iniciarsalvamento': {
-            const isAdmin = await checkAdmin(sock, msg);
-            if (!isAdmin) {
-                await sock.sendMessage(from, { text: '⚠ Apenas administradores podem iniciar o salvamento em cascata.' }, { quoted: msg });
-                return;
-            }
-            if (batchSaveMode.has(userJid)) {
-                await sock.sendMessage(from, { text: '⚠ Você já está no modo de salvamento em cascata.' }, { quoted: msg });
-                return;
-            }
-            const timerId = setTimeout(() => {
-                stopBatchSave(sock, from, userJid, "Timeout de 5 min atingido.");
-                sock.sendMessage(from, { 
-                text: `✅ Modo de salvamento em cascata DESATIVADO para @${userJid.split('@')[0]} por 5 minutos.\n\nEnvie as mensagens de resultado das missões. O bot salvará (💾) as válidas e ignorará (❓) as outras.\n\nDigite *!encerrarsalvamento* quando terminar.`,
-                mentions: [userJid]
-            });
-            }, BATCH_TIMEOUT_MS);
-            batchSaveMode.set(userJid, timerId);
-            console.log(`[Handler DIJ] Modo de salvamento iniciado para ${userJid}.`);
-            await sock.sendMessage(from, { 
-                text: `✅ Modo de salvamento em cascata ATIVADO para @${userJid.split('@')[0]} por 5 minutos.\n\nEnvie as mensagens de resultado das missões. O bot salvará (💾) as válidas e ignorará (❓) as outras.\n\nDigite *!encerrarsalvamento* quando terminar.`,
-                mentions: [userJid]
-            });
-            return;
-        }
-
-        // --- NOVA LÓGICA: !salvarmissao (Modo Único) ---
-        case '!salvarmissao': {
-            console.log("[Handler DIJ] Detectado comando !salvarmissao (Modo Único).");
-            const isAdmin = await checkAdmin(sock, msg);
-            if (!isAdmin) {
-                await sock.sendMessage(from, { text: '⚠ Apenas administradores podem usar este comando.' }, { quoted: msg });
-                return;
-            }
-
-            const ctx = msg.message?.extendedTextMessage?.contextInfo;
-            const quoted = ctx?.quotedMessage;
-            const adminJid = msg.key.participant || msg.key.remoteJid;
-            let textoBruto = '';
-            const args = text.split(' ').slice(1);
-
-            // Lógica Dual-Mode (baseada no arquivo salvarmissao.js v2.1)
-            if (quoted) {
-                textoBruto = parser.extractText(quoted);
-            } else {
-                const lines = text.split('\n');
-                if (lines.length <= 1) {
-                    await sock.sendMessage(from, { text: '⚠ Formato inválido.\n\nUse este comando:\n1. *Respondendo* a UMA mensagem de resultado.\n2. *Colando* os resultados ABAIXO do comando `!salvarmissao`.' }, { quoted: msg });
+            // Chama o wrapper e passa a lógica do comando como uma "lambda" (arrow function)
+            await withAdminPermission(sock, msg, async () => {
+                
+                // O código aqui dentro SÓ roda se o usuário FOR admin
+                if (batchSaveMode.has(userJid)) {
+                    await sock.sendMessage(from, { text: '⚠ Você já está no modo de salvamento em cascata.' }, { quoted: msg });
                     return;
                 }
-                textoBruto = lines.slice(1).join('\n');
-            }
-
-            // Validação (Anti-Lixo)
-            if (!textoBruto || textoBruto.trim().length < 10) {
-                 await sock.sendMessage(from, { text: '❌ Não encontrei texto válido para salvar (mínimo 10 caracteres).' }, { quoted: msg });
-                 return;
-            }
-            const lowerText = textoBruto.toLowerCase().replace(/\*/g, '');
-            const isMissionResult = lowerText.includes(MISSION_START_STRING.toLowerCase()); // Usa a mesma keyword forte
-            if (!isMissionResult) {
-                await sock.sendMessage(from, { text: '❌ Texto inválido. A mensagem não parece ser um resultado de missão (falta o cabeçalho "Parabéns Para Os Que Concluíram...").' }, { quoted: msg });
-                return;
-            }
-
-            // Salva no Banco de Dados
-            try {
-                await db.saveMissaoConcluida(textoBruto, adminJid);
-                await sock.sendMessage(from, { react: { text: '💾', key: msg.key } }); // Salvo
-                await sock.sendMessage(from, { text: `✅ 1 Resultado de missão (Modo Único) salvo no depósito.` }, { quoted: msg });
-
-            } catch (e) {
-                if (e.message === 'DUPLICATE') {
-                    console.warn(`[Handler DIJ] Missão duplicada ignorada (Modo Único por ${adminJid}).`);
-                    await sock.sendMessage(from, { react: { text: '⚠️', key: msg.key } }); // Duplicado
-                    await sock.sendMessage(from, { text: `⚠️ Este resultado de missão já foi salvo anteriormente.` }, { quoted: msg });
-                } else {
-                    console.error("[ERRO saveMissaoConcluida]", e);
-                    await sock.sendMessage(from, { text: '❌ Erro interno ao salvar a missão no DB. Verifique os logs.' }, { quoted: msg });
-                }
-            }
+                const timerId = setTimeout(() => {
+                    stopBatchSave(sock, from, userJid, "Timeout de 5 min atingido.");
+                }, BATCH_TIMEOUT_MS);
+                batchSaveMode.set(userJid, timerId);
+                console.log(`[Handler DIJ] Modo de salvamento iniciado para ${userJid}.`);
+                await sock.sendMessage(from, { 
+                    text: `✅ Modo de salvamento em cascata ATIVADO para @${userJid.split('@')[0]} por 5 minutos.\n\nEnvie as mensagens de resultado das missões. O bot salvará (💾) as válidas e ignorará (❓) as outras.\n\nDigite *!encerrarsalvamento* quando terminar.`,
+                    mentions: [userJid]
+                });
+            }); // Fim do wrapper 'withAdminPermission'
             return;
         }
-        // --- FIM DA NOVA LÓGICA ---
 
-        // case '!vermissoes': {
-        //     // TODO: Adicionar a lógica do vermissoes.js aqui
-        //     return;
-        // }
+        // --- COMANDO !salvarmissao REFATORADO ---
+        case '!salvarmissao': {
+            await withAdminPermission(sock, msg, async () => {
+                console.log("[Handler DIJ] Detectado comando !salvarmissao (Modo Único).");
+                
+                const ctx = msg.message?.extendedTextMessage?.contextInfo;
+                const quoted = ctx?.quotedMessage;
+                const adminJid = msg.key.participant || msg.key.remoteJid;
+                let textoBruto = '';
+                
+                // Lógica Dual-Mode
+                if (quoted) {
+                    textoBruto = parser.extractText(quoted);
+                } else {
+                    const lines = text.split('\n');
+                    if (lines.length <= 1) { 
+                        await sock.sendMessage(from, { text: '⚠ Formato inválido.\n\nUse este comando:\n1. *Respondendo* a UMA mensagem de resultado.\n2. *Colando* os resultados ABAIXO do comando `!salvarmissao`.' }, { quoted: msg });
+                        return;
+                    }
+                    textoBruto = lines.slice(1).join('\n');
+                }
+
+                // Validação (Anti-Lixo)
+                if (!textoBruto || textoBruto.trim().length < 10) { 
+                    await sock.sendMessage(from, { text: '❌ Não encontrei texto válido para salvar (mínimo 10 caracteres).' }, { quoted: msg });
+                    return; 
+                }
+                
+                // --- VALIDAÇÃO ATUALIZADA (v2.6) ---
+                const cleanText = textoBruto.replace(/\*|_|~|`|\0|\u200B|\uFE0F/g, '');
+                const isMissionResult = cleanText.includes(MISSION_ANCHOR_1) && 
+                                        cleanText.includes(MISSION_ANCHOR_2);
+                // --- FIM DA VALIDAÇÃO ---
+
+                if (!isMissionResult) {
+                    await sock.sendMessage(from, { text: '❌ Texto inválido. A mensagem não parece ser um resultado de missão (falta o cabeçalho 🔺...🔻).' }, { quoted: msg });
+                    return;
+                }
+
+                // Salva no Banco de Dados
+                try {
+                    await db.saveMissaoConcluida(textoBruto, adminJid);
+                    await sock.sendMessage(from, { react: { text: '💾', key: msg.key } }); 
+                    await sock.sendMessage(from, { text: `✅ 1 Resultado de missão (Modo Único) salvo no depósito.` }, { quoted: msg });
+                } catch (e) {
+                    if (e.message === 'DUPLICATE') {
+                        await sock.sendMessage(from, { react: { text: '⚠️', key: msg.key } }); 
+                        await sock.sendMessage(from, { text: `⚠️ Este resultado de missão já foi salvo anteriormente.` }, { quoted: msg });
+                    } else {
+                        // Lança o erro para o wrapper 'withAdminPermission' tratar
+                        throw e; 
+                    }
+                }
+            }); // Fim do wrapper 'withAdminPermission'
+            return;
+        }
+
+        // --- COMANDO !vermissoes REFATORADO ---
+        case '!vermissoes':
+        case '!vermissao':
+        case '!verm':
+        {
+            await withAdminPermission(sock, msg, async () => {
+                // A lógica do 'executarVerMissoes' vai aqui
+                
+                // 1. Define o limite (quantos mostrar)
+                let limit = 5; // Padrão
+                if (args.length > 0 && !isNaN(parseInt(args[0]))) {
+                    limit = parseInt(args[0]);
+                }
+                if (limit > 20) limit = 20;
+                if (limit <= 0) limit = 1;
+
+                // 2. Busca no Banco de Dados
+                const missoesArray = await db.getMissoesConcluidas(limit);
+
+                if (!missoesArray || missoesArray.length === 0) {
+                    await sock.sendMessage(from, { text: 'ℹ️ O depósito de missões está vazio.' }, { quoted: msg });
+                    return;
+                }
+
+                // 3. Formata a Resposta
+                let resposta = `📦 *Últimos ${missoesArray.length} Resultados Salvos no Depósito:*\n\n`;
+                const mencoes = [];
+                for (const missao of missoesArray) {
+                    const previewTexto = missao.texto_bruto.substring(0, 50).replace(/\n/g, ' ');
+                    resposta += `*ID:* ${missao.id}\n`;
+                    resposta += `*Data:* ${missao.data_registro}\n`;
+                    if (missao.admin_jid) {
+                        const adminNum = missao.admin_jid.split('@')[0];
+                        resposta += `*Admin:* @${adminNum}\n`;
+                        mencoes.push(missao.admin_jid);
+                    }
+                    resposta += `*Preview:* ${previewTexto}...\n`;
+                    resposta += `--------------------------------\n`;
+                }
+                
+                await sock.sendMessage(from, { text: resposta, mentions: [...new Set(mencoes)] }, { quoted: msg });
+
+            }); // Fim do wrapper 'withAdminPermission'
+            return;
+        }
     }
 }
 
-module.exports = { handlerDIJ, isUserInBatchMode };
+module.exports = { 
+    handlerDIJ,
+    isUserInBatchMode 
+};

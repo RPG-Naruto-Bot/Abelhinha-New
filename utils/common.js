@@ -42,6 +42,38 @@ const checkAdmin = async (sock, msg) => {
     }
 };
 
+// --- NOVA FUNÇÃO WRAPPER (A "LAMBDA") ---
+/**
+ * Executa uma função de callback (lógica do comando) somente se o usuário for admin.
+ * Lida automaticamente com a mensagem de erro se não for admin.
+ * @param {object} sock O socket Baileys.
+ * @param {object} msg A mensagem (info).
+ * @param {Function} commandLogic A função (lambda) a ser executada se o usuário for admin.
+ */
+const withAdminPermission = async (sock, msg, commandLogic) => {
+    const from = msg.key.remoteJid;
+
+    if (await checkAdmin(sock, msg)) {
+        // 1. É Admin: Tenta executar a lógica do comando
+        try {
+            await commandLogic();
+        } catch (error) {
+            // 2. Erro na LÓGICA DO COMANDO
+            console.error(`[withAdminPermission] Erro ao executar lógica de comando admin:`, error);
+            try {
+                await sock.sendMessage(from, { text: `❌ Erro interno ao executar o comando. Avise o Setor de TI.` }, { quoted: msg });
+            } catch (e2) {}
+        }
+    } else {
+        // 3. NÃO é Admin: Envia a mensagem de erro padrão
+        try {
+            await sock.sendMessage(from, { text: '⚠ Apenas administradores podem usar este comando.' }, { quoted: msg });
+        } catch (e2) {}
+    }
+};
+// --- FIM DA NOVA FUNÇÃO ---
+
 module.exports = {
-    checkAdmin
+    checkAdmin,
+    withAdminPermission // <-- Exporta o wrapper
 };

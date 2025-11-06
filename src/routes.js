@@ -57,7 +57,11 @@ const commandRoutes = [
              const userJid = msg.key.participant || msg.key.remoteJid;
 
              // Condição 1: É um comando da DIJ?
-             if (lowerText.startsWith('!iniciarsalvamento') || lowerText.startsWith('!encerrarsalvamento')) {
+             if (lowerText.startsWith('!iniciarsalvamento') || 
+                 lowerText.startsWith('!encerrarsalvamento')||
+                 lowerText.startsWith('!vermissoes')        ||
+                 lowerText.startsWith('!vermissao')         ||
+                 lowerText.startsWith('!verm')) {
                  return true;
              }
 
