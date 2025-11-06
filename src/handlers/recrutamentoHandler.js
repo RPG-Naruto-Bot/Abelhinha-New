@@ -1,5 +1,5 @@
 /*
- * ARQUIVO: src/Handlers/recrutamentoHandler.js
+ * ARQUIVO: src/handlers/recrutamentoHandler.js
  * * Responsabilidade: Contém toda a lógica relacionada
  * ao recrutamento de jogadores via fichas enviadas no WhatsApp.
  * Histórias de Usuário Atendidas:

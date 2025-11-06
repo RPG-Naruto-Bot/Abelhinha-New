@@ -11,8 +11,8 @@ const { fakerPT_BR: faker } = require('@faker-js/faker'); // Usa a localização
 const moment = require('moment-timezone');
 
 // Carrega nossas configs para dados realistas
-const clasConfig = require('../src/Configs/clas.json');
-const patentesEmojis = require('../src/Configs/patentes_emojis.json');
+const clasConfig = require('../src/configs/clas.json');
+const patentesEmojis = require('../src/configs/patentes_emojis.json');
 
 // Pega os nomes dos clãs e os emojis de patente
 const clanNames = Object.keys(clasConfig);

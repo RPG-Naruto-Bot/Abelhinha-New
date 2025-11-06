@@ -1,27 +1,24 @@
 /*
- * ARQUIVO: src/Utils/database.js
+ * ARQUIVO: Utils/database.js
  * * Responsabilidade: Isolar toda a interação com o banco de dados SQLite (DAL).
- *
- * v2.2 - Migração para SQLite finalizada
- * - Adicionada função saveMissaoBruta para o módulo DIJ.
+ * v2.5 - CORRIGIDO: 'saveFicha' e 'saveMissaoConcluida' agora incluem
+ * todas as colunas corretas (timestamp, hash_texto) no INSERT.
+ * Adição das mensagens de falha na conexão com o sqlite
  */
 
+const fs = require('fs'); // Importado no topo
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
 const moment = require('moment-timezone');
-const fs = require('fs'); // Necessário para initDatabase
+const crypto = require('crypto');
 
-// --- Configuração do Caminho do DB ---
-// Sobe um nível de 'Utils/' para chegar na raiz 'Abelinha-v2/'
+// Caminho para o banco de dados SQLite
 const projectRootDir = path.join(__dirname, '..');
 const dataDir = path.join(projectRootDir, 'data');
-
-// Define o arquivo do banco de dados SQLite
-const dbPath = path.join(dataDir, 'rpg_data.db'); // Nome correto do arquivo
+const dbPath = path.join(dataDir, 'rpg_data.db');
 
 /**
- * Garante que o diretório 'data' exista. 
- * A criação da tabela é feita externamente via scripts/init-db.js.
+ * Garante que o diretório 'data' exista.
  */
 function initDatabaseDir() {
     try {
@@ -50,7 +47,9 @@ function getAllFichas() {
         });
         const sql = `SELECT * FROM fichas`;
         db.all(sql, [], (err, rows) => {
-            db.close((closeErr) => { /* ... */ });
+            db.close((closeErr) => {
+                if (closeErr) { console.error('[DB][getAllFichas] Erro ao fechar conexão:', closeErr.message); }
+            });
             if (err) {
                 console.error('[DB][getAllFichas] Erro ao executar SELECT:', err.message);
                 return resolve({});
@@ -84,7 +83,9 @@ function getFichasByTimestamp(startTimestamp, endTimestamp) {
         `;
         const params = [startTimestamp, endTimestamp];
         db.all(sql, params, (err, rows) => {
-            db.close((closeErr) => { /* ... */ });
+            db.close((closeErr) => {
+                if (closeErr) { console.error('[DB][saveMissaoConcluida] Erro ao fechar conexão:', closeErr.message); }
+            });
             if (err) {
                 console.error('[DB][getByTimestamp] Erro ao executar SELECT:', err.message);
                 return resolve([]);
@@ -102,8 +103,11 @@ function getFichasByTimestamp(startTimestamp, endTimestamp) {
  */
 function saveFicha(targetJid, dadosFicha) {
     return new Promise((resolve, reject) => {
-        const timestamp = Date.now();
+        // --- CORREÇÃO: Timestamp movido para ser gerado aqui ---
+        const timestamp = Date.now(); 
         const dataFormatada = dadosFicha.data || moment(timestamp).tz('America/Sao_Paulo').format('DD/MM/YYYY');
+        // --- FIM CORREÇÃO ---
+
         const emojiDisplay = dadosFicha.emojiCla ? `${dadosFicha.emojiCla} ` : '';
         const displayName = `📚 ${emojiDisplay}${dadosFicha.nome} ${dadosFicha.cla} ${dataFormatada}`.trim().replace(/\s+/g, ' ');
         const waid = targetJid.split('@')[0];
@@ -126,11 +130,16 @@ function saveFicha(targetJid, dadosFicha) {
         const params = [
             targetJid, dadosFicha.nome, dadosFicha.cla, dadosFicha.emojiCla || null,
             dadosFicha.recrutadoPorTexto || 'Não informado', dadosFicha.registradoPorJid || null,
-            dataFormatada, timestamp, vcard, displayName
+            dataFormatada, 
+            timestamp, // <-- CORREÇÃO: Timestamp adicionado
+            vcard, 
+            displayName
         ];
 
         db.run(sql, params, function (err) {
-            db.close((closeErr) => { /* ... */ });
+            db.close((closeErr) => {
+                if (closeErr) { console.error('[DB][saveMissaoConcluida] Erro ao fechar conexão:', closeErr.message); }
+            });
             if (err) {
                 console.error('[DB][saveFicha] Erro ao executar INSERT OR REPLACE:', err.message);
                 return reject(new Error(`Erro ao salvar no DB: ${err.message}`));
@@ -154,7 +163,6 @@ function getMissoesConcluidas(limit = 50) {
             }
         });
 
-        // Seleciona as últimas 50 missões salvas
         const sql = `
             SELECT * FROM missoes_concluidas 
             ORDER BY timestamp DESC
@@ -172,7 +180,6 @@ function getMissoesConcluidas(limit = 50) {
         });
     });
 }
-// --- FIM DA FUNÇÃO RENOMEADA ---
 
 /**
  * Salva o texto bruto de uma missão na tabela missoes_concluidas.
@@ -182,6 +189,10 @@ function saveMissaoConcluida(textoBruto, adminJid) {
     return new Promise((resolve, reject) => {
         const timestamp = Date.now();
         const dataRegistro = moment(timestamp).tz('America/Sao_Paulo').format('DD/MM/YYYY HH:mm:ss');
+        
+        // --- GERAÇÃO DO HASH ---
+        const hash = crypto.createHash('md5').update(textoBruto).digest('hex');
+        // --- FIM DA GERAÇÃO ---
 
         const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE, (err) => {
             if (err) { 
@@ -190,16 +201,30 @@ function saveMissaoConcluida(textoBruto, adminJid) {
             }
         });
 
+        // --- CORREÇÃO: Adicionada coluna 'hash_texto' ---
         const sql = `
             INSERT INTO missoes_concluidas (
-                texto_bruto, admin_jid, data_registro, timestamp
-            ) VALUES (?, ?, ?, ?);
+                texto_bruto, admin_jid, data_registro, timestamp, hash_texto
+            ) VALUES (?, ?, ?, ?, ?);
         `;
-        const params = [ textoBruto, adminJid || null, dataRegistro, timestamp ];
+        const params = [ 
+            textoBruto, 
+            adminJid || null, 
+            dataRegistro, 
+            timestamp, 
+            hash // <-- HASH ADICIONADO
+        ];
+        // --- FIM DA CORREÇÃO ---
 
         db.run(sql, params, function (err) {
             db.close();
             if (err) { 
+                 // --- DETECÇÃO DE DUPLICATA ---
+                if (err.message.includes('SQLITE_CONSTRAINT: UNIQUE constraint failed: missoes_concluidas.hash_texto')) {
+                    console.warn(`[DB][saveMissaoConcluida] Tentativa de inserir missão duplicada (hash: ${hash}).`);
+                    return reject(new Error('DUPLICATE')); // Retorna o erro específico
+                }
+                // --- FIM DA DETECÇÃO ---
                 console.error('[DB][saveMissaoConcluida] Erro ao executar INSERT:', err.message);
                 return reject(new Error(`Erro ao salvar missão concluída no DB: ${err.message}`));
             }
@@ -213,6 +238,6 @@ module.exports = {
     getAllFichas,
     getFichasByTimestamp,
     saveFicha,
-    saveMissaoConcluida, // <-- Exporta a função com nome novo
-    getMissoesConcluidas // <-- Exporta a função com nome novo
+    saveMissaoConcluida,
+    getMissoesConcluidas
 };

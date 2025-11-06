@@ -7,7 +7,7 @@
     Este arquivo ajuda a manter o código organizado e modular.
     Exemplo simples de roteamento de mensagens:  
 */
-const { commandRoutes } = require('./src/routes.js');
+const { commandRoutes } = require('./src/routes');
 
 // Função auxiliar para extrair texto de diferentes tipos de mensagens, a lógica ta boa, NAO MUDAR
 function getMessageText(message) {
