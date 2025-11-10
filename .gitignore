@@ -2,7 +2,7 @@
 /node_modules
 
 # Arquivos de sessão do Baileys (Correto)
-/auth_info_baileys
+auth_info_baileys/
 
 # Arquivos de ambiente e segredos (Correto)
 .env

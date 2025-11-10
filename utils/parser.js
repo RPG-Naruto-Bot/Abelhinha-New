@@ -234,7 +234,7 @@ function parseFicha(texto) {
     
     // Usamos 'clasAceitos' (que é o seu 'clas.json' importado)
     // E verificamos se ele 'tem a propriedade' da claKey.
-    if (!clasAceitos.hasOwnProperty(claKey)) {
+    if (!Object.prototype.hasOwnProperty.call(clasAceitos, claKey)) {
         // Se o clã (ex: "raiunko") não for encontrado no mapa, é inválido.
         return { error: `O clã "${claEncontrado}" não é um clã válido ou reconhecido.` };
     }

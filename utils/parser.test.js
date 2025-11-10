@@ -1,10 +1,8 @@
 // utils/parser.test.js
-const { error } = require('console');
 const { extractText, 
         detectarFicha,
         parseFicha,
         normalizeCla,
-        normalizeRecruiterNameLight,
         tryExtract } = require('./parser'); // Certifique-se que o nome da função está correto
 
 // 1. 🗂️ CRIAMOS A "TABELA" DE CENÁRIOS
