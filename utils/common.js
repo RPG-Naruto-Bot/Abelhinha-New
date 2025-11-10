@@ -12,30 +12,35 @@
  */
 const checkAdmin = async (sock, msg) => {
     const groupId = msg.key.remoteJid;
-    // Garante que só execute em grupos
-    if (!groupId || !groupId.endsWith('@g.us')) {
+    if (!groupId || !groupId.endsWith('@g.us')) return false;
+
+    let senderJid = msg.key.participant || msg.participant || null;
+
+    // 🔹 Corrige o sufixo ":xx" que o Baileys adiciona em replies
+    if (senderJid && senderJid.includes(':')) {
+        senderJid = senderJid.split(':')[0] + '@s.whatsapp.net';
+    }
+
+    if (!senderJid) {
+        console.warn('[checkAdmin] Não foi possível identificar o remetente real da mensagem.');
         return false;
     }
 
-    const senderJid = msg.key.participant || msg.key.remoteJid; // Quem enviou
-
     try {
-        // Busca os metadados do grupo
         const groupMetadata = await sock.groupMetadata(groupId);
-        
-        // Encontra as informações do participante específico
-        const participantInfo = groupMetadata.participants.find(p => p.id === senderJid);
+
+        // 🔹 Busca compatível com a nova estrutura do Baileys (id @lid ou phoneNumber @s.whatsapp.net)
+        const participantInfo = groupMetadata.participants.find(
+            p => p.id === senderJid || p.phoneNumber === senderJid
+        );
 
         if (!participantInfo) {
-            console.warn(`[checkAdmin] ALERTA: Não foi possível encontrar informações do participante ${senderJid} na lista do grupo.`);
+            console.warn(`[checkAdmin] Participante ${senderJid} não encontrado no grupo ${groupId}.`);
             return false;
         }
 
-        // A lógica de verificação (padrão Baileys)
         const isAdmin = participantInfo.admin === 'admin' || participantInfo.admin === 'superadmin';
-        
         return isAdmin;
-
     } catch (e) {
         console.error("[checkAdmin] ERRO ao buscar metadados ou verificar admin:", e.message || e);
         return false;
@@ -62,13 +67,17 @@ const withAdminPermission = async (sock, msg, commandLogic) => {
             console.error(`[withAdminPermission] Erro ao executar lógica de comando admin:`, error);
             try {
                 await sock.sendMessage(from, { text: `❌ Erro interno ao executar o comando. Avise o Setor de TI.` }, { quoted: msg });
-            } catch (e2) {}
+            } catch (e2) {
+                console.error(`[withAdminPermission] Erro ao enviar mensagem de permissão negada:`, e2);
+            }
         }
     } else {
         // 3. NÃO é Admin: Envia a mensagem de erro padrão
         try {
             await sock.sendMessage(from, { text: '⚠ Apenas administradores podem usar este comando.' }, { quoted: msg });
-        } catch (e2) {}
+        } catch (e2) {
+            console.error(`[withAdminPermission] Erro ao enviar mensagem de permissão negada:`, e2);
+        }
     }
 };
 // --- FIM DA NOVA FUNÇÃO ---

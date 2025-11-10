@@ -40,7 +40,6 @@ async function routeMessage(sock, msg) {
             await route.action(sock, msg, text); 
             // Esse console.log é apenas para fins de depuração
             console.log(`[ROTA ACIONADA] Handler: ${route.name} | JID: ${remoteJid} | Remetente: ${senderJid}`);
-            break;
         }
     }
 }

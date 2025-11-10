@@ -38,7 +38,7 @@ initDatabaseDir(); // Executa a inicialização do diretório
  * @returns {Promise<object>} Promise resolvida com objeto { jid: fichaData }
  */
 function getAllFichas() {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READONLY, (err) => {
             if (err) {
                 console.error('[DB][getAllFichas] Erro ao conectar:', err.message);
@@ -68,7 +68,7 @@ function getAllFichas() {
  * @returns {Promise<Array<object>>} Retorna array de objetos.
  */
 function getFichasByTimestamp(startTimestamp, endTimestamp) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READONLY, (err) => {
             if (err) {
                 console.error('[DB][getByTimestamp] Erro ao conectar:', err.message);
@@ -155,7 +155,7 @@ function saveFicha(targetJid, dadosFicha) {
  * @returns {Promise<Array<object>>} Uma Promise que resolve com um ARRAY de missões.
  */
 function getMissoesConcluidas(limit = 50) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READONLY, (err) => {
             if (err) {
                 console.error('[DB][getMissoesConcluidas] Erro ao conectar:', err.message);

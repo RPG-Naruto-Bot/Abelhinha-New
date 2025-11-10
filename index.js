@@ -8,9 +8,9 @@ const {
     useMultiFileAuthState
 } = require('baileys');
 const pino = require('pino');
-
 const qrcode = require('qrcode-terminal');
 const { routeMessage } = require('./messageRouter');
+
 
 // Dentro de index.js, no topo:
 const { startAPIServer } = require('./src/handlers/api_server');
@@ -57,7 +57,9 @@ function startBot() {
                     let statusCode = null;
                     try {
                         statusCode = lastDisconnect?.error?.output?.statusCode ?? lastDisconnect?.error?.statusCode;
-                    } catch (e) { }
+                    } catch (e) {
+                        console.error('Erro ao obter statusCode:', e);
+                     }
 
                     console.log('Conexão fechada. statusCode:', statusCode);
 
