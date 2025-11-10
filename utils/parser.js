@@ -13,9 +13,6 @@
 // Carrega os dicionários
 const clasAceitos = require('../src/configs/clas.json');
 const patentesTexto = require('../src/configs/patentes.json');
-const patentesEmojis = require('../src/configs/patentes_emojis.json');
-const clanEmojis = Object.values(clasAceitos);
-const allKnownEmojis = [...clanEmojis, ...patentesEmojis];
 /**
  * Extrai o texto de qualquer tipo de mensagem do WhatsApp.
  */
@@ -61,9 +58,6 @@ function normalizeCla(claInput) {
         const emojiLimpo = cleanAndStripVS(emoji || '');
         const emojiNormLimpo = norm(emojiLimpo);
 
-        // -- DEBUG DETALHADO DA COMPARAÇÃO --
-        // console.log(`[normalizeCla DEBUG] Comparando InputNorm ('${claNormInput}') com EmojiNorm ('${emojiNormLimpo}') para ${nomeClaOficial}`);
-
         if (emoji && claNormInput === emojiNormLimpo) {
             claEncontrado = nomeClaOficial;
             emojiCla = emoji; // Guarda o emoji ORIGINAL do JSON
@@ -74,16 +68,11 @@ function normalizeCla(claInput) {
     // 2. Se não achou pelo emoji, tenta encontrar pelo Nome
     for (const [nomeClaOficial, emoji] of Object.entries(clasAceitos)) {
         // Compara nome oficial (idealmente já normalizado no JSON) com input normalizado+limpo
-        if (claNormInput.includes(nomeClaOficial)) {
+        if (claNormInput === norm(nomeClaOficial)) {
             claEncontrado = nomeClaOficial;
             emojiCla = emoji;
             break;
         }
-    }
-
-    // Se chegou aqui, não houve match por emoji nem por nome
-    if (claEncontrado === inputLimpo) { // Verifica se claEncontrado ainda é o input original
-       console.log(`[normalizeCla DEBUG] SEM MATCH DEFINITIVO. Input '${claInput}' -> Retornando Cla '${claEncontrado}', Emoji '${emojiCla}'`);
     }
     return { claEncontrado, emojiCla };
 }
@@ -93,7 +82,6 @@ function normalizeCla(claInput) {
  * Detecta se um texto parece ser uma ficha.
  */
 function detectarFicha(texto) {
-    // ... (código do detectarFicha - sem alteração) ...
     if (!texto) return false;
     const norm = (texto + '')
         .toLowerCase()
@@ -114,7 +102,7 @@ const isSeparator = (s) => {
     const t = (s || '').trim();
     if (!t) return true;
     const noLetters = t.replace(/[A-Za-z0-9Á-Úá-úÀ-Ùà-ù]/g, '').length >= Math.max(3, t.length - 2);
-    const dashy = /[\-—_➖=]{3,}/.test(t);
+    const dashy = /[-—_➖=]{3,}/.test(t);
     return dashy || noLetters;
 };
 const stripMd = (s) => String(s || '').replace(/^[_*~\s]+|[_*~\s]+$/g, '').trim();
@@ -126,12 +114,11 @@ const isMeaningful = (s) => {
     return /[A-Za-zÁ-Úá-úÀ-Ùà-ù]/.test(c);
 };
 const tryExtract = (raw, keywords) => {
-    // ... (código do tryExtract - sem alteração) ...
     const ln = norm(raw);
     if (!keywords.some(k => ln.includes(k))) return null;
     const after = raw.split(/[:\-–—]\s*/);
     if (after.length > 1) return after.slice(1).join(':').trim();
-    const match = raw.match(new RegExp(`^[^:]?\\b(?:${keywords.join('|')})\\b\\s(.*)$`, 'i'));
+    const match = raw.match(new RegExp(`^[^:]?(?:${keywords.join('|')})(?=\\s|$)\\s+(.*)$`, 'i'));
     if (match && match[1]) return match[1].trim();
     return null;
 };
@@ -197,7 +184,7 @@ function parseFicha(texto) {
         // Tenta extrair CLÃ, se ainda não encontrado
         // (Guarda o input bruto, mesmo que vazio, se a keyword for encontrada)
         if (claInput === '') { // Usamos '' como estado inicial não encontrado
-            const v = tryExtract(linhaRaw, ['cla', 'clan']);
+            const v = tryExtract(linhaRaw, ['clã', 'cla', 'clan']);
             if (v !== null) { // tryExtract retorna null se keyword não encontrada
                 claInput = v; // Guarda o valor (pode ser vazio)
                 continue; // Vai para a próxima linha
@@ -223,47 +210,42 @@ function parseFicha(texto) {
                         break; // Sai do loop interno
                     }
                 }
-                // Mesmo que tenha encontrado na próxima linha, vai para a próxima linha do loop principal
-                // (Se 'recrutadoPor' foi encontrado, o 'if (!recrutadoPor)' falhará nas próximas iterações)
             }
         }
     } // --- Fim do Loop Principal ---
 
-    // --- Fallbacks (Se o loop não encontrou) ---
-    if (!nome) {
-        const m = (texto || '').match(/(?:nome\s*\/\s*nick|nome|nick)[^\n:\-–—][:\-–—]?\s(.+)/i);
-        if (m) nome = cleanValue(m[1]);
-    }
-    if (claInput === '') { // Se loop não achou a keyword 'Clã:'
-        const m = norm(texto || '').match(/cl[ãa]n?[^\n:\-–—][:\-–—]?\s([^\n]*)/i);
-        if (m) claInput = cleanValue(m[1]); // Pode ser ""
-    }
-    if (!recrutadoPor) {
-        const m = (texto || '').match(/(?:recrutado por|indicado por|recrutador)[^\n:\-–—][:\-–—]?\s(.+)/i);
-        if (m) {
-            const cand = cleanValue(m[1]);
-            if (isMeaningful(cand)) {
-                recrutadoPor = normalizeRecruiterNameLight(cand); // Limpeza leve
-            }
-        }
-    }
-    // --- Fim dos Fallbacks ---
-
-    // Validação Final: Nome é obrigatório
+    // 1. Validação do Nome (como você já tinha)
     if (!nome) {
         return { error: 'Não foi possível identificar o Nome na ficha.' };
     }
 
-    // Normaliza o Clã (mesmo que 'claInput' seja vazio)
+    // 2. Normaliza o Clã (como você já tinha)
+    // 'claInput' é o texto que o parser encontrou (ex: "Akasuna", "Uchiha", "Pikachu", ou "")
     const { claEncontrado, emojiCla } = normalizeCla(claInput);
 
-    // Retorna o objeto final
+    // 3. A NOVA TRAVA DE SEGURANÇA
+    if (!claEncontrado || claEncontrado === 'Sem Clã') {
+        // Falha se o campo "Clã:" estava vazio ou não foi encontrado
+        return { error: 'O campo "Clã" está vazio ou não foi preenchido.' };
+    }
+    // 4. Trava de Validação (O PONTO CRÍTICO CORRIGIDO)
+    // Verifica se o clã encontrado EXISTE no seu 'clas.json'
+    const claKey = claEncontrado.toLowerCase();
+    
+    // Usamos 'clasAceitos' (que é o seu 'clas.json' importado)
+    // E verificamos se ele 'tem a propriedade' da claKey.
+    if (!clasAceitos.hasOwnProperty(claKey)) {
+        // Se o clã (ex: "raiunko") não for encontrado no mapa, é inválido.
+        return { error: `O clã "${claEncontrado}" não é um clã válido ou reconhecido.` };
+    }
+
+    // 5. Retorna o objeto final (agora 100% validado)
     return {
         success: true,
         nome: nome,
-        cla: claEncontrado, // Pode ser vazio se input era vazio e não deu match
-        emojiCla: emojiCla, // Será vazio se claEncontrado for vazio
-        recrutadoPorTexto: recrutadoPor || 'Não informado' // Retorna o nome semi-limpo
+        cla: claEncontrado, // Agora temos certeza que é um clã válido
+        emojiCla: emojiCla,
+        recrutadoPorTexto: recrutadoPor || 'Não informado'
     };
 }
 
@@ -272,5 +254,6 @@ module.exports = {
     detectarFicha,
     parseFicha,
     normalizeCla,
-    normalizeRecruiterNameLight
+    normalizeRecruiterNameLight,
+    tryExtract
 };

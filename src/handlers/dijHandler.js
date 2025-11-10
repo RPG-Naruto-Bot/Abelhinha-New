@@ -7,7 +7,7 @@
 
 const db = require('../../utils/database.js'); 
 // --- MUDANÇA: Importa o novo wrapper ---
-const { checkAdmin, withAdminPermission } = require('../../utils/common.js'); 
+const { withAdminPermission } = require('../../utils/common.js'); 
 const parser = require('../../utils/parser.js');
 
 // --- 1. Armazenamento de Estado (Modo de Lote) ---

@@ -2,7 +2,8 @@
  * ARQUIVO: commands/recrutamento/andamento_players.js
  * * Implementa a História 2.4: /andamento players
  */
-const db = require('../../utils/database');
+const db = require('../../../utils/database');
+const { parseAndamentoArgs } = require('./parsers.js');
 
 module.exports = {
     name: 'andamento',
@@ -14,43 +15,34 @@ module.exports = {
         const info = msg;
         const from = info.key.remoteJid;
 
-        // Verifica se o sub-comando é 'players'
-        if (args[0]?.toLowerCase() !== 'players') return;
+        // 1. Delega a análise de data para o parser
+        const { startTimestamp, endTimestamp, periodTitle } = parseAndamentoArgs(args);
 
-        // TODO: Adicionar verificação de Admin (isAdm)
-
-        const fichas = db.getAllFichas();
-        const fichasArray = Object.values(fichas);
+        // 2. Busca no DB com o filtro de data
+        const fichasArray = await db.getFichasByTimestamp(startTimestamp, endTimestamp);
         
         if (fichasArray.length === 0) {
-            await sock.sendMessage(from, { text: 'ℹ️ Nenhuma ficha foi processada ainda.' }, { quoted: info });
+            await sock.sendMessage(from, { text: `ℹ️ Nenhuma ficha encontrada no período: ${periodTitle}` }, { quoted: info });
             return;
         }
 
+        // 3. Sua lógica de contagem (já estava ótima)
         const contagem = {};
         for (const ficha of fichasArray) {
-            const adminJid = ficha.registradoPorJid || 'Desconhecido';
-            contagem[adminJid] = (contagem[adminJid] || 0) + 1;
+            // Alterado para 'recrutadoPorTexto', como no seu 'registrar.js' original
+            const recrutadorNome = ficha.recrutadoPorTexto || 'Não Informado';
+            contagem[recrutadorNome] = (contagem[recrutadorNome] || 0) + 1;
         }
 
-        let resposta = '📈 *Produtividade - Organizadores*\n\n';
-        
-        const adminsOrdenados = Object.entries(contagem)
-            .sort(([, a], [, b]) => b - a);
+        // 4. Sua lógica de formatação (ótima!)
+        let resposta = `📈 *Produtividade - Recrutadores (${periodTitle})*\n_(Quem indicou o recruta)_\n\n`;
+        const adminsOrdenados = Object.entries(contagem).sort(([, a], [, b]) => b - a);
             
-        let mencoes = [];
-        for (const [jid, total] of adminsOrdenados) {
-            if (jid === 'Desconhecido') {
-                resposta += `❓ *Desconhecido:* ${total} recrutas\n`;
-            } else {
-                const numero = jid.split('@')[0];
-                resposta += `👤 @${numero}: *${total}* recrutas\n`;
-                mencoes.push(jid);
-            }
+        for (const [nome, total] of adminsOrdenados) {
+            resposta += `👥 *${nome}:* ${total} recrutas\n`;
         }
         
-        resposta += `\n*Total:* ${fichasArray.length} fichas processadas.`;
-
-        await sock.sendMessage(from, { text: resposta, mentions: mencoes }, { quoted: info });
+        resposta += `\n*Total:* ${fichasArray.length} fichas processadas no período.`;
+        await sock.sendMessage(from, { text: resposta }, { quoted: info });
     }
 };
