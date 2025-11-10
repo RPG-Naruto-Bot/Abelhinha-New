@@ -1,10 +1,27 @@
-node_modules/
-auth_info_baileys/
+# Dependências do Node (Correto)
+/node_modules
+
+# Arquivos de sessão do Baileys (Correto)
+/auth_info_baileys
+
+# Arquivos de ambiente e segredos (Correto)
 .env
 
-# Banco de Dados SQLite (NUNCA commitar dados)
-data/recrutas.db
-data/recrutas.db-journal # Arquivo temporário do SQLite
+# Banco de Dados SQLite (Correto)
+/data/rpg_data.db
+/data/rpg_data.db-journal
 
-# Opcional: Ignorar pasta de scripts se não quiser versioná-los
-# scripts/
+# Relatórios de teste do Jest (NOVO)
+/coverage/
+
+# Arquivos de sistema operacional (Recomendado)
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Arquivos de build (Se você usar TypeScript um dia)
+/dist
+*.js.map

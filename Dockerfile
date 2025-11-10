@@ -13,7 +13,7 @@ WORKDIR /app
 # o passo 'npm ci' não precisará ser refeito em builds futuros.
 COPY package.json package-lock.json* ./
 
-# 4. Instala as dependências de produção
+# 4. Instala as dependências de produção 
 # 'npm ci' é mais rápido e seguro para builds, usando o package-lock.json.
 # '--only=production' ignora devDependencies que não são necessárias no container final.
 RUN npm ci --omit=dev
@@ -27,8 +27,11 @@ COPY . .
 # Também garante que o usuário 'node' (criado pela imagem base) tenha permissão.
 RUN mkdir -p /app/auth_info_baileys /app/data && chown node:node /app/auth_info_baileys /app/data
 
-# 7. Muda para o usuário não-root 'node' (Boas práticas de segurança)
+# 7. Expõe a porta que o bot usará
+EXPOSE 3000
+
+# 8. Muda para o usuário não-root 'node' (Boas práticas de segurança)
 USER node
 
-# 8. Define o comando padrão para iniciar o bot quando o container rodar
+# 9. Define o comando padrão para iniciar o bot quando o container rodar
 CMD ["node", "index.js"]

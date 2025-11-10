@@ -1,26 +1,37 @@
-# Dependências locais (instaladas dentro do container)
-node_modules
+# Arquivos sensíveis e de ambiente
+# NUNCA devem estar na imagem
+.env
 
-# Git e arquivos temporários
-.git
-.gitignore
-.vscode/
-*.log
+# Pastas de dados, sessão e logs
+# Serão montadas como volumes, não buildadas
+auth_info_baileys/
+data/
+temp/
+logs/
+
+# Dependências locais (o Docker vai cuidar disso)
+node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Arquivos sensíveis e de ambiente
-.env
+# Configurações de Teste e Dev
+# Não são necessárias em produção
+.eslintrc.json
+eslint.config.mjs
+jest.config.js
+coverage/
+*.test.js
 
-# Pastas que serão persistidas via volumes (não devem ir pro build)
-auth_info_baileys
-data
-temp
-logs
+# Arquivos do Git e do Editor
+.git/
+.gitignore
+.vscode/
 
-# Arquivos de configuração e docs que não influenciam o build
+# Arquivos do próprio Docker
 Dockerfile
 .dockerignore
+
+# Documentação e arquivos de texto
 *.md
 *.txt

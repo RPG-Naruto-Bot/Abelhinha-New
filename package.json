@@ -1,19 +1,36 @@
 {
   "name": "abelinha-v2",
   "version": "1.0.0",
-  "description": "",
+  "description": "Bot modular de RPG/gestão de recrutas com automação, minigames e controle de fichas para WhatsApp",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "node index.js",
+    "start": "node index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint . --ext .js",
+    "lint:fix": "eslint . --ext .js --fix",
+    "init:db": "node scripts/init-db.js",
+    "seed:db": "node scripts/seed-db.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/RPG-Naruto-Bot/Abelhinha-New.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "whatsapp",
+    "bot",
+    "rpg",
+    "baileys",
+    "recrutas"
+  ],
+  "author": "RPG Naruto Bot Team",
   "license": "ISC",
   "type": "commonjs",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "bugs": {
     "url": "https://github.com/RPG-Naruto-Bot/Abelhinha-New/issues"
   },
@@ -32,6 +49,11 @@
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
-    "@faker-js/faker": "^10.1.0"
+    "@faker-js/faker": "^10.1.0",
+    "@types/node": "^24.10.0",
+    "eslint": "^9.39.1",
+    "eslint-plugin-jest": "^29.0.1",
+    "jest": "^30.2.0",
+    "typescript": "^5.9.3"
   }
 }
