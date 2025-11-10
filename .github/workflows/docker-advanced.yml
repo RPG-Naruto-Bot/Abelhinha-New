@@ -127,7 +127,7 @@ jobs:
     steps:
       - name: Notify Failure on Discord ❌
         if: ${{ needs.docker-build-push.result != 'success' }}
-        uses: Ilshidur/action-discord@v2
+        uses: Ilshidur/action-discord@master
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
           username: "Abelinha CI/CD"
