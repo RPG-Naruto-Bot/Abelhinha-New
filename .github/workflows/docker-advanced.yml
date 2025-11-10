@@ -122,31 +122,31 @@ jobs:
     name: 4️⃣ Notify Build Result
     runs-on: ubuntu-latest
     needs: [lint, test, docker-build-push]
-    if: always() # Sempre roda, mesmo se algum job falhar
+    if: always()
 
     steps:
       - name: Notify Failure on Discord ❌
         if: ${{ needs.docker-build-push.result != 'success' }}
-        uses: r-grid/action-discord-notification@v1
+        uses: Ilshidur/action-discord@v2
         with:
-          webhook_url: ${{ secrets.DISCORD_WEBHOOK }}
-          title: "❌ Build Falhou! (Abelinha-v2)"
-          color: "#FF0000"
-          description: |
-            O pipeline da **Abelinha-v2** falhou 🚨  
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          username: "Abelinha CI/CD"
+          content: |
+            ❌ **Build Falhou! (Abelinha-v2)**  
+            O pipeline falhou 🚨  
             **Commit:** `${{ github.sha }}`
             **Autor:** `${{ github.actor }}`
             **Logs:** [Acessar Execução](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
 
       - name: Notify Success on Discord ✅
         if: ${{ needs.docker-build-push.result == 'success' }}
-        uses: r-grid/action-discord-notification@v1
+        uses: Ilshidur/action-discord@v2
         with:
-          webhook_url: ${{ secrets.DISCORD_WEBHOOK }}
-          title: "✅ Deploy Concluído! (Abelinha-v2)"
-          color: "#00FF00"
-          description: |
-            A nova versão da **Abelinha-v2** foi construída e enviada ao Docker Hub 🐳  
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          username: "Abelinha CI/CD"
+          content: |
+            ✅ **Deploy Concluído! (Abelinha-v2)**  
+            A nova versão foi enviada ao Docker Hub 🐳  
             **Commit:** `${{ github.sha }}`
             **Autor:** `${{ github.actor }}`
-            **Logs:** [Acessar Execução](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            **Logs:** [Ver execução](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
