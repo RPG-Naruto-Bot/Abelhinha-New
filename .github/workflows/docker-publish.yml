@@ -47,7 +47,7 @@ jobs:
           cache: 'npm' # <--- MUDANÇA: Adiciona cache do NPM
       - run: npm ci # <--- MUDANÇA: 'npm ci'
       - run: npm test -- --coverage
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: coverage/
