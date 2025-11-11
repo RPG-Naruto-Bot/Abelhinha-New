@@ -13,7 +13,9 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
+  issues: write
+  pull-requests: write
 
 env:
   NODE_VERSION: 20
