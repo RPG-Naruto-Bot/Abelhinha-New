@@ -60,7 +60,7 @@ jobs:
   # 3️⃣ SEMANTIC RELEASE
   # ------------------------------------
   semantic-release:
-    name: 🏷️ Semantic Release
+    name: 3️⃣ Semantic Release
     runs-on: ubuntu-latest
     needs: [lint, test]
     steps:

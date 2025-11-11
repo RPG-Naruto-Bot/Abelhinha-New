@@ -1,3 +1,3 @@
-export default {
-  extends: ['@commitlint/config-conventional'],
-};
+// commitlint.config.js
+const { rules } = require("@commitlint/config-conventional");
+module.exports = { extends: ["@commitlint/config-conventional"] };
