@@ -115,7 +115,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-  # ------------------------------------
+    # ------------------------------------
   # 4️⃣ NOTIFY — Envio para o Discord
   # ------------------------------------
   notify:
@@ -128,10 +128,10 @@ jobs:
       - name: Notify Failure on Discord ❌
         if: ${{ needs.docker-build-push.result != 'success' }}
         uses: Ilshidur/action-discord@master
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK }}
-          username: "Abelinha CI/CD"
-          content: |
+          args: |
             ❌ **Build Falhou! (Abelinha-v2)**  
             O pipeline falhou 🚨  
             **Commit:** `${{ github.sha }}`
@@ -141,10 +141,10 @@ jobs:
       - name: Notify Success on Discord ✅
         if: ${{ needs.docker-build-push.result == 'success' }}
         uses: Ilshidur/action-discord@master
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK }}
-          username: "Abelinha CI/CD"
-          content: |
+          args: |
             ✅ **Deploy Concluído! (Abelinha-v2)**  
             A nova versão foi enviada ao Docker Hub 🐳  
             **Commit:** `${{ github.sha }}`
