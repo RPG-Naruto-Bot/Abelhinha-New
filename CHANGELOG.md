@@ -2,6 +2,14 @@
 
 Todas as mudanças notáveis neste projeto são documentadas neste arquivo.
 
+# [1.1.0](https://github.com/RPG-Naruto-Bot/Abelhinha-New/compare/v1.0.0...v1.1.0) (2025-11-12)
+
+
+### Features
+
+* **recrutamento:** Implementa o fluxo de processamento de fichas ([0668a96](https://github.com/RPG-Naruto-Bot/Abelhinha-New/commit/0668a96a10a55b58676d4cdb6b7d5e4e8048317e))
+* **recrutamento:** Implementa o fluxo de processamento de fichas ([04e789b](https://github.com/RPG-Naruto-Bot/Abelhinha-New/commit/04e789bc29f4dce7fd679a43ea8215034b9aacad))
+
 # 1.0.0 (2025-11-12)
 
 
