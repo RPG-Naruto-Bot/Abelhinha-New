@@ -11,7 +11,6 @@ const pino = require('pino');
 const qrcode = require('qrcode-terminal');
 const { routeMessage } = require('./messageRouter');
 
-
 // Dentro de index.js, no topo:
 const { startAPIServer } = require('./src/handlers/api_server');
 
