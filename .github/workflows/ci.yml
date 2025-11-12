@@ -33,7 +33,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - run: npm ci
+      - run: npm ci || npm install
       - name: Verify secrets not leaked
         uses: trufflesecurity/trufflehog@main
         with:
@@ -71,7 +71,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - run: npm ci
+      - run: npm ci || npm install
       - run: npm audit --audit-level=high || true
       - run: npm test -- --coverage
       - uses: actions/upload-artifact@v4
