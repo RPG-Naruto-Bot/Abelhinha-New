@@ -4,6 +4,7 @@ module.exports = {
     "main",
     { name: "develop", prerelease: "beta" }, // NOVO: suporte a develop com beta
   ],
+  tagFormat: "v${version}",
   plugins: [
     [
       "@semantic-release/commit-analyzer",
