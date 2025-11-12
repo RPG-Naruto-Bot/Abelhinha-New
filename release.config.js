@@ -1,6 +1,9 @@
 // release.config.js
 module.exports = {
-  branches: ["main"],
+  branches: [
+    "main",
+    { name: "develop", prerelease: "beta" }, // NOVO: suporte a develop com beta
+  ],
   plugins: [
     [
       "@semantic-release/commit-analyzer",
@@ -11,7 +14,9 @@ module.exports = {
           { type: "docs", release: false },
           { type: "style", release: false },
           { type: "refactor", release: false },
-          { type: "test", release: false }
+          { type: "test", release: false },
+          { type: "perf", release: "patch" }, // NOVO: perfs geram patch
+          { type: "ci", release: false }, // NOVO: CI não gera release
         ],
       },
     ],
@@ -20,6 +25,7 @@ module.exports = {
       "@semantic-release/changelog",
       {
         changelogFile: "CHANGELOG.md",
+        changelogTitle: "# 🐝 Changelog — Abelhinha-v2\n\nTodas as mudanças notáveis neste projeto são documentadas neste arquivo.",
       },
     ],
     [
@@ -28,13 +34,18 @@ module.exports = {
         npmPublish: false, // evita publish no npm
       },
     ],
-    "@semantic-release/github",
+    [
+      "@semantic-release/github",
+      {
+        successComment: "✅ Release v${nextRelease.version} publicado!\n\n${nextRelease.notes}",
+        failComment: "❌ Release falhou. Verifique os logs.",
+      },
+    ],
     [
       "@semantic-release/git",
       {
-        assets: ["CHANGELOG.md", "package.json"],
-        message:
-          "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}",
+        assets: ["CHANGELOG.md", "package.json", "package-lock.json"], // NOVO: inclui lock file
+        message: "chore(release): v${nextRelease.version} [skip ci]\n\n${nextRelease.notes}",
       },
     ],
   ],
