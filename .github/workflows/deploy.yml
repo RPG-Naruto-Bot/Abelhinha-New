@@ -1,0 +1,68 @@
+# ============================================
+# ☁️ Remote Deploy — Abelhinha-v2 (Oracle Cloud)
+# --------------------------------------------
+# Deploy remoto via SSH, usando imagem Docker mais recente
+# Dispara manualmente ou após release
+# ============================================
+
+name: Remote Deploy ☁️
+
+on:
+  workflow_dispatch: # Permite rodar manualmente pelo GitHub Actions
+  workflow_call:     # Permite ser chamado por outros workflows
+  push:
+    tags:
+      - "v*.*.*"     # Opcional: dispara em novas tags de release
+
+jobs:
+  deploy:
+    name: 🚀 Deploy to Oracle Instance
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: 🧩 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🔑 Connect and Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            echo "🌐 Iniciando deploy remoto da Abelhinha..."
+            cd ~/abelhinha
+            echo "📦 Atualizando containers..."
+            docker compose pull
+            docker compose up -d
+            docker image prune -f
+            echo "✅ Deploy concluído com sucesso!"
+
+      - name: 📣 Notify Success on Discord
+        if: success()
+        uses: Ilshidur/action-discord@master
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        with:
+          args: |
+            ✅ **Deploy remoto realizado com sucesso! (Abelhinha-v2)**  
+            Servidor Oracle atualizado com a nova imagem.  
+            **Commit:** `${{ github.sha }}`  
+            **Autor:** `${{ github.actor }}`  
+            [Ver execução](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})  
+
+      - name: ❌ Notify Failure on Discord
+        if: failure()
+        uses: Ilshidur/action-discord@master
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        with:
+          args: |
+            ⚠️ **Falha no deploy remoto! (Abelhinha-v2)**  
+            Verifique os logs do pipeline.  
+            **Commit:** `${{ github.sha }}`  
+            **Autor:** `${{ github.actor }}`  
+            [Ver logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
