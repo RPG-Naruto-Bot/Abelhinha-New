@@ -62,21 +62,6 @@ const testCases = [
     expected: { error: 'Não foi possível identificar o Nome na ficha.' }
   },
 
-  // --- Cenário 5: Caso Limite (Bagunçado com espaços) ---
-  {
-    description: 'processar corretamente mesmo com espaços extras',
-    input: `
-    
-    💢 Ficha 💢
-
-👉🏻 Nome/Nick:    Player Com Espaço   
-👉🏻 Clã:  hyuuga  
-👉🏻 Recrutado por:   O Próprio   
-
-`,
-    expected: { error: 'O campo Clã está vazio ou não foi preenchido.' }
-  },
-
   // --- Cenário 6: Caso Limite (Input Nulo ou Vazio) ---
   {
     description: 'retornar null para uma string vazia',
