@@ -1,9 +1,9 @@
 // utils/parser.test.js
-const { extractText, 
-        detectarFicha,
-        parseFicha,
-        normalizeCla,
-        tryExtract } = require('./parser'); // Certifique-se que o nome da função está correto
+const { extractText,
+  detectarFicha,
+  parseFicha,
+  normalizeCla,
+  tryExtract } = require('./parser'); // Certifique-se que o nome da função está correto
 
 // 1. 🗂️ CRIAMOS A "TABELA" DE CENÁRIOS
 const testCases = [
@@ -41,7 +41,7 @@ const testCases = [
 ➖➖➖➖➖➖➖➖➖➖➖`,
     expected: { error: 'O campo "Clã" está vazio ou não foi preenchido.' }
   },
-  
+
   // --- Cenário 3: Caminho Triste (Faltando "Nome") ---
   {
     description: 'retornar null se o Nome estiver faltando',
@@ -52,7 +52,7 @@ const testCases = [
 👉🏻 Recrutado por: Alguém
 
 ➖➖➖➖➖➖➖➖➖➖➖`,
-    expected: { error: 'Não foi possível identificar o Nome na ficha.' } 
+    expected: { error: 'Não foi possível identificar o Nome na ficha.' }
   },
 
   // --- Cenário 4: Caminho Triste (Texto aleatório) ---
@@ -74,7 +74,7 @@ const testCases = [
 👉🏻 Recrutado por:   O Próprio   
 
 `,
-    expected: { error: 'O clã "hyuuga" não é um clã válido ou reconhecido.' }
+    expected: { error: 'O campo \"Clã\" está vazio ou não foi preenchido.' }
   },
 
   // --- Cenário 6: Caso Limite (Input Nulo ou Vazio) ---
@@ -98,13 +98,13 @@ const testCases = [
 `,
     expected: {
       nome: 'Sasuke',
-      cla: 'uchiha', 
+      cla: 'uchiha',
       recrutadoPorTexto: 'Orochimaru',
-      emojiCla: '㊗', 
+      emojiCla: '㊗',
       success: true
     }
   },
-    {
+  {
     description: 'processar corretamente a ficha com apenas nick e vez de nome/nick',
     input: `
 💢 Ficha 💢
@@ -114,13 +114,13 @@ const testCases = [
 `,
     expected: {
       nome: 'Sasuke',
-      cla: 'uchiha', 
+      cla: 'uchiha',
       recrutadoPorTexto: 'Orochimaru',
-      emojiCla: '㊗', 
+      emojiCla: '㊗',
       success: true
     }
   },
-    {
+  {
     description: 'processar corretamente um input onde foram removidos os nomes dos campos',
     input: `
 💢 Ficha 💢
@@ -166,12 +166,12 @@ const testCases = [
 
 // 2. ⚙️ EXECUTAMOS OS TESTES COM O test.each
 describe('Testes do parseFicha', () => {
-  
+
   // O Jest vai rodar esta função UMA VEZ para cada objeto no array 'testCases'
   test.each(testCases)(
     'deve $description', // O nome do teste será preenchido dinamicamente
     ({ input, expected }) => { // Pega o 'input' e o 'expected' de cada cenário
-      
+
       // 2. Act (Agir)
       const result = parseFicha(input);
 
@@ -185,77 +185,97 @@ describe('Testes do parseFicha', () => {
 describe('Testes do normalizeCla', () => {
   // Vamos criar cenários para todos os clãs
   const claTestCases = [
+    { input: 'Pikachu', expected: { claEncontrado: null, emojiCla: ''} }, // Clã inválido de controle
     // --- Clãs Válidos (Konoha) ---
-    { input: 'uchiha',   expected: { claEncontrado: 'uchiha', emojiCla: '㊗' } },
-    { input: 'inuzuka',  expected: { claEncontrado: 'inuzuka', emojiCla: '🐾' } },
-    { input: 'aburame',  expected: { claEncontrado: 'aburame', emojiCla: '🕷' } },
-    { input: 'uzumaki',  expected: { claEncontrado: 'uzumaki', emojiCla: '🌀' } },
-    { input: 'senju',    expected: { claEncontrado: 'senju', emojiCla: '♓' } },
-    { input: 'nara',     expected: { claEncontrado: 'nara', emojiCla: '♣' } },
+    { input: 'uchiha', expected: { claEncontrado: 'uchiha', emojiCla: '㊗' } },
+    { input: 'inuzuka', expected: { claEncontrado: 'inuzuka', emojiCla: '🐾' } },
+    { input: 'aburame', expected: { claEncontrado: 'aburame', emojiCla: '🕷' } },
+    { input: 'uzumaki', expected: { claEncontrado: 'uzumaki', emojiCla: '🌀' } },
+    { input: 'senju', expected: { claEncontrado: 'senju', emojiCla: '♓' } },
+    { input: 'nara', expected: { claEncontrado: 'nara', emojiCla: '♣' } },
     { input: 'namikaze', expected: { claEncontrado: 'namikaze', emojiCla: '〽' } },
     { input: 'yamanaka', expected: { claEncontrado: 'yamanaka', emojiCla: '🛐' } },
 
     // --- Clãs Especiais / Ame ---
-    { input: 'kyusuke',  expected: { claEncontrado: 'kyusuke', emojiCla: '🗯' } }, // Baseado no seu debug, este não capitaliza
-    { input: 'garasu',   expected: { claEncontrado: 'garasu', emojiCla: '⚪' } },
-    { input: 'pain',     expected: { claEncontrado: 'pain', emojiCla: '☦' } },
-    { input: 'kagari',   expected: { claEncontrado: 'kagari', emojiCla: '📛' } },
-    { input: 'kami',     expected: { claEncontrado: 'kami', emojiCla: '⚜️' } },
-    
+    { input: 'kyusuke', expected: { claEncontrado: 'kyusuke', emojiCla: '🗯' } }, // Baseado no seu debug, este não capitaliza
+    { input: 'garasu', expected: { claEncontrado: 'garasu', emojiCla: '⚪' } },
+    { input: 'pain', expected: { claEncontrado: 'pain', emojiCla: '☦' } },
+    { input: 'kagari', expected: { claEncontrado: 'kagari', emojiCla: '📛' } },
+    { input: 'kami', expected: { claEncontrado: 'kami', emojiCla: '⚜️' } },
+
     // --- Clãs (Oto) ---
-    { input: 'kunmo',    expected: { claEncontrado: 'kunmo', emojiCla: '🕸' } },
-    { input: 'shin',     expected: { claEncontrado: 'shin', emojiCla: '👁‍🗨' } },
-    { input: 'yakushi',  expected: { claEncontrado: 'yakushi', emojiCla: '♉' } },
-    { input: 'orochi',   expected: { claEncontrado: 'orochi', emojiCla: '🔯' } },
-    { input: 'jūgo',     expected: { claEncontrado: 'jūgo', emojiCla: '⚛' } },
-    
+    { input: 'kunmo', expected: { claEncontrado: 'kunmo', emojiCla: '🕸' } },
+    { input: 'shin', expected: { claEncontrado: 'shin', emojiCla: '👁‍🗨' } },
+    { input: 'yakushi', expected: { claEncontrado: 'yakushi', emojiCla: '♉' } },
+    { input: 'orochi', expected: { claEncontrado: 'orochi', emojiCla: '🔯' } },
+    { input: 'jūgo', expected: { claEncontrado: 'jūgo', emojiCla: '⚛' } },
+
     // --- Clãs (Kiri) ---
     { input: 'hoshigaki', expected: { claEncontrado: 'hoshigaki', emojiCla: '⛎' } },
-    { input: 'yuki',     expected: { claEncontrado: 'yuki', emojiCla: '❄' } },
+    { input: 'yuki', expected: { claEncontrado: 'yuki', emojiCla: '❄' } },
     { input: 'karaitachi', expected: { claEncontrado: 'karaitachi', emojiCla: '⚕' } },
-    { input: 'hougan',   expected: { claEncontrado: 'hougan', emojiCla: '㊙' } },
-    
+    { input: 'hougan', expected: { claEncontrado: 'hougan', emojiCla: '㊙' } },
+
     // --- Clãs (Suna) ---
-    { input: 'soubaki',  expected: { claEncontrado: 'soubaki', emojiCla: '🈷' } },
-    { input: 'akasuna',  expected: { claEncontrado: 'akasuna', emojiCla: '🎭' } },
-    { input: 'render',   expected: { claEncontrado: 'render', emojiCla: '🈚' } },
-    { input: 'hoki',     expected: { claEncontrado: 'hoki', emojiCla: '💮' } },
+    { input: 'soubaki', expected: { claEncontrado: 'soubaki', emojiCla: '🈷' } },
+    { input: 'akasuna', expected: { claEncontrado: 'akasuna', emojiCla: '🎭' } },
+    { input: 'render', expected: { claEncontrado: 'render', emojiCla: '🈚' } },
+    { input: 'hoki', expected: { claEncontrado: 'hoki', emojiCla: '💮' } },
     { input: 'kazekage', expected: { claEncontrado: 'kazekage', emojiCla: '🏺' } },
-    
+
     // --- Clãs (Iwa/Outros) ---
-    { input: 'shouton',  expected: { claEncontrado: 'shouton', emojiCla: '💎' } },
-    { input: 'bakurei',  expected: { claEncontrado: 'bakurei', emojiCla: '🕊' } },
-    { input: 'hinsei',   expected: { claEncontrado: 'hinsei', emojiCla: '⛓' } },
+    { input: 'shouton', expected: { claEncontrado: 'shouton', emojiCla: '💎' } },
+    { input: 'bakurei', expected: { claEncontrado: 'bakurei', emojiCla: '🕊' } },
+    { input: 'hinsei', expected: { claEncontrado: 'hinsei', emojiCla: '⛓' } },
     { input: 'kamizuru', expected: { claEncontrado: 'kamizuru', emojiCla: '🐝' } },
 
     // --- Casos de Borda (TRIM e CASE) ---
     { input: '   uchiha   ', expected: { claEncontrado: 'uchiha', emojiCla: '㊗' } }, // Testando .trim()
-    { input: 'UcHiHa',       expected: { claEncontrado: 'uchiha', emojiCla: '㊗' } }, // Testando case-insensitivity
-    
+    { input: 'UcHiHa', expected: { claEncontrado: 'uchiha', emojiCla: '㊗' } }, // Testando case-insensitivity
+
     // --- Casos de Falha (Baseado nos seus logs) ---
-    { input: 'hyuuga',     expected: { claEncontrado: 'hyuuga', emojiCla: '' } }, // Log: "SEM MATCH ... Input 'hyuuga' -> ... Emoji ''"
-    { input: 'ClaInvalido', expected: { claEncontrado: 'ClaInvalido', emojiCla: '' } }, // Assumindo que o default é emoji ''
-    { input: '',           expected: { claEncontrado: '', emojiCla: '' } }, // Log: "SEM MATCH ... Input '' -> ... Emoji ''"
-    { input: null,         expected: { claEncontrado: '', emojiCla: '' } }, // Testando input nulo
-    {
-    description: 'retornar o input original se o clã for desconhecido',
-    input: 'Pikachu', // Um clã que 100% não existe
-    expected: {
-      claEncontrado: 'Pikachu', // Retorna o input original (após limpeza)
-      emojiCla: ''              // Sem emoji
-        }
-    },
-    { input: '㊗',   expected: { claEncontrado: 'uchiha', emojiCla: '㊗' } },
+    { input: 'hyuuga', expected: { claEncontrado: null, emojiCla: '' } }, // Log: "SEM MATCH ... Input 'hyuuga' -> ... Emoji ''"
+    { input: 'ClaInvalido', expected: { claEncontrado: null, emojiCla: '' } }, // Assumindo que o default é emoji ''
+    { input: '', expected: { claEncontrado: null, emojiCla: '' } }, // Log: "SEM MATCH ... Input '' -> ... Emoji ''"
+    { input: null, expected: { claEncontrado: null, emojiCla: '' } }, // Testando input nulo
+    { input: '㊗', expected: { claEncontrado: 'uchiha', emojiCla: '㊗' } },
+
+    // -- Casos extremos de falha --
+    { input: 'Kamizuru🐝', expected: { claEncontrado: 'kamizuru', emojiCla: '🐝' } },
+    { input: '⚜️Kami', expected: { claEncontrado: 'kami', emojiCla: '⚜️' } },
+    { input: '  🐾Inuzuka  ', expected: { claEncontrado: 'inuzuka', emojiCla: '🐾' } },
+    // --- Casos Extremos e Mistos ---
+    { input: 'Kamizuru🐝', expected: { claEncontrado: 'kamizuru', emojiCla: '🐝' } },
+    { input: '⚜️Kami', expected: { claEncontrado: 'kami', emojiCla: '⚜️' } },
+    { input: '  🐾Inuzuka  ', expected: { claEncontrado: 'inuzuka', emojiCla: '🐾' } },
+    { input: '🐝Kamizuru🐝', expected: { claEncontrado: 'kamizuru', emojiCla: '🐝' } },
+    { input: '🐾Inu🐾zuka', expected: { claEncontrado: 'inuzuka', emojiCla: '🐾' } },
+    { input: '**🕷Aburame**', expected: { claEncontrado: 'aburame', emojiCla: '🕷' } },
+    { input: '__🌀 Uzumaki__', expected: { claEncontrado: 'uzumaki', emojiCla: '🌀' } },
+    { input: '〽️  Namikaze  ', expected: { claEncontrado: 'namikaze', emojiCla: '〽' } },
+    { input: '🛐yamanaka🛐', expected: { claEncontrado: 'yamanaka', emojiCla: '🛐' } },
+    { input: '♣NARA♣', expected: { claEncontrado: 'nara', emojiCla: '♣' } },
+    { input: '🌀  uzumaki💫', expected: { claEncontrado: 'uzumaki', emojiCla: '🌀' } },
+    { input: '🐾  🐾  inuzuka', expected: { claEncontrado: 'inuzuka', emojiCla: '🐾' } },
+    { input: 'uzumaki\u200B', expected: { claEncontrado: 'uzumaki', emojiCla: '🌀' } },
+    { input: '⚜️kami\uFE0F', expected: { claEncontrado: 'kami', emojiCla: '⚜️' } },
+    { input: '“Inuzuka”', expected: { claEncontrado: 'inuzuka', emojiCla: '🐾' } },
+    { input: '‘Aburame’', expected: { claEncontrado: 'aburame', emojiCla: '🕷' } },
+    { input: '🐝Kamizuru💀', expected: { claEncontrado: 'kamizuru', emojiCla: '🐝' } },
+    { input: '💫🐝Kamizuru', expected: { claEncontrado: 'kamizuru', emojiCla: '🐝' } },
+    { input: '💀', expected: { claEncontrado: null, emojiCla: '' } },
+    { input: '   ', expected: { claEncontrado: null, emojiCla: '' } },
+
   ];
 
   // Usamos o test.each para rodar todos os cenários
   test.each(claTestCases)(
     'deve normalizar o input "$input" para "$expected.cla" com emoji "$expected.emojiCla"',
     ({ input, expected }) => {
-      
+
       const result = normalizeCla(input);
       expect(result).toEqual(expected);
-      
+
     }
   );
 });
@@ -396,7 +416,7 @@ describe('Testes do tryExtract', () => {
       keywords: ['nome', 'nick'],
       expected: 'Gui Kyusuke 🗯'
     },
-    
+
     // --- Alvo: Linha 130/131 (Caminho do Fallback Regex) ---
     {
       desc: 'extrair valor sem dois-pontos (fallback regex)',
@@ -421,10 +441,10 @@ describe('Testes do tryExtract', () => {
       expected: 'por'
     },
     {
-    desc: 'retornar null se a linha for SÓ a keyword',
-    input: 'Nome', // Tem a keyword, mas não tem valor
-    keywords: ['nome', 'nick'],
-    expected: null // Deve falhar na regex e cair no "return null" final
+      desc: 'retornar null se a linha for SÓ a keyword',
+      input: 'Nome', // Tem a keyword, mas não tem valor
+      keywords: ['nome', 'nick'],
+      expected: null // Deve falhar na regex e cair no "return null" final
     },
   ];
 

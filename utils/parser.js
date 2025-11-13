@@ -34,49 +34,60 @@ function extractText(msg) {
     } catch { return ''; }
 };
 
-// --- FUNÇÃO DE NORMALIZAÇÃO DE CLÃ (MAIS ROBUSTA AINDA) ---
-/**
- * Normaliza o nome OU emoji do clã e encontra o nome oficial e emoji.
- * @param {string} claInput O nome ou emoji do clã vindo da ficha/override.
- * @returns {{claEncontrado: string, emojiCla: string}} Objeto com nome oficial e emoji.
- */
 function normalizeCla(claInput) {
+    const emojiRegex =
+  /(?:\p{Emoji_Presentation}|\p{Extended_Pictographic})(?:\uFE0F)?(?:\u200D(?:\p{Emoji_Presentation}|\p{Extended_Pictographic})(?:\uFE0F)?)*/gu;
+   
+    const cleanAndStripVS = (s) =>
+        cleanValue(s).replace(/\0|\u200B|\uFE0F/g, '').trim();
 
-    // --- MUDANÇA: Limpeza AINDA MAIS AGRESSIVA ---
-    // Remove markdown, aspas, null, ZWS, E o Variation Selector 16 (FE0F)
-    const cleanAndStripVS = (s) => cleanValue(s).replace(/\0|\u200B|\uFE0F/g, ''); // Adicionado \uFE0F
-    const inputLimpo = cleanAndStripVS(claInput);
-    // --- FIM DA MUDANÇA ---
+    const inputLimpo = cleanAndStripVS(claInput)
+        .replace(/[‘’‚‛“”„‟«»‹›"'`´]/g, '')
+        .trim();
 
-    let claEncontrado = inputLimpo; // Padrão
+    let claEncontrado = null;
     let emojiCla = '';
-    const claNormInput = norm(inputLimpo); // Normaliza (NFD, lowercase) o input JÁ LIMPO E STRIPPADO
 
-    // 1. Tenta encontrar pelo Emoji PRIMEIRO (comparando normalizados e limpos)
-    for (const [nomeClaOficial, emoji] of Object.entries(clasAceitos)) {
-        // Limpa e normaliza o emoji do JSON também para garantir
-        const emojiLimpo = cleanAndStripVS(emoji || '');
-        const emojiNormLimpo = norm(emojiLimpo);
+    // 1. Captura emoji
+    const emojiMatch = inputLimpo.match(emojiRegex);
+    if (emojiMatch) emojiCla = emojiMatch[0];
 
-        if (emoji && claNormInput === emojiNormLimpo) {
-            claEncontrado = nomeClaOficial;
-            emojiCla = emoji; // Guarda o emoji ORIGINAL do JSON
-            return { claEncontrado, emojiCla };
+    // 2. Remove o emoji do nome
+    const nomeSemEmoji = inputLimpo.replace(emojiRegex, '').trim();
+    const nomeNorm = norm(nomeSemEmoji);
+
+    // 3. Se achou emoji, tenta casar
+    if (emojiCla) {
+        for (const [nomeClaOficial, emoji] of Object.entries(clasAceitos)) {
+            if (
+                emoji &&
+                norm(emoji.replace(/\uFE0F/g, '')) === norm(emojiCla.replace(/\uFE0F/g, ''))
+            ) {
+                claEncontrado = nomeNorm || nomeClaOficial;
+                emojiCla = emoji; // mantém FE0F original
+                break;
+            }
         }
     }
 
-    // 2. Se não achou pelo emoji, tenta encontrar pelo Nome
-    for (const [nomeClaOficial, emoji] of Object.entries(clasAceitos)) {
-        // Compara nome oficial (idealmente já normalizado no JSON) com input normalizado+limpo
-        if (claNormInput === norm(nomeClaOficial)) {
-            claEncontrado = nomeClaOficial;
-            emojiCla = emoji;
-            break;
+    // 4. Tenta casar pelo nome
+    if (!claEncontrado && nomeNorm) {
+        for (const [nomeClaOficial, emoji] of Object.entries(clasAceitos)) {
+            if (nomeNorm === norm(nomeClaOficial)) {
+                claEncontrado = nomeClaOficial;
+                emojiCla = emoji;
+                break;
+            }
         }
     }
+    if (!claEncontrado) {
+        claEncontrado = null;
+        emojiCla = '';
+    }
+
+    // 5. Se não achou nada, retorna nulos
     return { claEncontrado, emojiCla };
 }
-// --- FIM DA FUNÇÃO CORRIGIDA ---
 
 /**
  * Detecta se um texto parece ser uma ficha.
@@ -231,7 +242,7 @@ function parseFicha(texto) {
     // 4. Trava de Validação (O PONTO CRÍTICO CORRIGIDO)
     // Verifica se o clã encontrado EXISTE no seu 'clas.json'
     const claKey = claEncontrado.toLowerCase();
-    
+
     // Usamos 'clasAceitos' (que é o seu 'clas.json' importado)
     // E verificamos se ele 'tem a propriedade' da claKey.
     if (!Object.prototype.hasOwnProperty.call(clasAceitos, claKey)) {
