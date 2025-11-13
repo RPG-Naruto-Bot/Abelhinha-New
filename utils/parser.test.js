@@ -74,7 +74,7 @@ const testCases = [
 👉🏻 Recrutado por:   O Próprio   
 
 `,
-    expected: { error: 'O campo \"Clã\" está vazio ou não foi preenchido.' }
+    expected: { error: 'O campo Clã está vazio ou não foi preenchido.' }
   },
 
   // --- Cenário 6: Caso Limite (Input Nulo ou Vazio) ---
