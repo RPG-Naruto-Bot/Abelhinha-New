@@ -2,6 +2,13 @@
 
 Todas as mudanças notáveis neste projeto são documentadas neste arquivo.
 
+# [1.4.0](https://github.com/RPG-Naruto-Bot/Abelhinha-New/compare/v1.3.0...v1.4.0) (2025-11-13)
+
+
+### Features
+
+* **ci:** Implementa pipeline de Deploy Contínuo (CD) via SSH ([41e2b3b](https://github.com/RPG-Naruto-Bot/Abelhinha-New/commit/41e2b3bff27d5f46592265c8fd4a12f2e756f1cb))
+
 # [1.3.0](https://github.com/RPG-Naruto-Bot/Abelhinha-New/compare/v1.2.0...v1.3.0) (2025-11-13)
 
 
