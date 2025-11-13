@@ -2,6 +2,15 @@
 
 Todas as mudanças notáveis neste projeto são documentadas neste arquivo.
 
+# [1.2.0](https://github.com/RPG-Naruto-Bot/Abelhinha-New/compare/v1.1.0...v1.2.0) (2025-11-13)
+
+
+### Features
+
+* **dij:** Implementa persistência de missões no banco de dados ([4a11855](https://github.com/RPG-Naruto-Bot/Abelhinha-New/commit/4a11855febde5e6f75ed042a0e6c6d60a10e0e6a))
+* **dij:** Implementa persistência de missões no banco de dados ([481adad](https://github.com/RPG-Naruto-Bot/Abelhinha-New/commit/481adadc9e3e604090798aa52e5f2fd917b460c9))
+* **dij:** Implementa persistência de missões no banco de dados ([da1c6f5](https://github.com/RPG-Naruto-Bot/Abelhinha-New/commit/da1c6f5424da3d30f81b0d5a7903e560be731999))
+
 # [1.1.0](https://github.com/RPG-Naruto-Bot/Abelhinha-New/compare/v1.0.0...v1.1.0) (2025-11-12)
 
 
