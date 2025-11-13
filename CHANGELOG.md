@@ -2,6 +2,15 @@
 
 Todas as mudanças notáveis neste projeto são documentadas neste arquivo.
 
+## [1.4.1](https://github.com/RPG-Naruto-Bot/Abelhinha-New/compare/v1.4.0...v1.4.1) (2025-11-13)
+
+
+### Bug Fixes
+
+* alinhar teste de emoji com comportamento atual do normalizeCla ([57c3703](https://github.com/RPG-Naruto-Bot/Abelhinha-New/commit/57c3703c50d01a95078bab241d2ecd8eb97d5707))
+* alinhar teste de emoji com comportamento atual do normalizeCla ([73084ae](https://github.com/RPG-Naruto-Bot/Abelhinha-New/commit/73084aea955b0beaea8dc594c01a459ce62e8432))
+* alinhar teste de emoji com comportamento atual do normalizeCla ([1643bde](https://github.com/RPG-Naruto-Bot/Abelhinha-New/commit/1643bde730c89c48816373be0c16881925de5de6))
+
 # [1.4.0](https://github.com/RPG-Naruto-Bot/Abelhinha-New/compare/v1.3.0...v1.4.0) (2025-11-13)
 
 
