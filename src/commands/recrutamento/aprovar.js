@@ -60,7 +60,7 @@ async function executarAprovarAutomatico(sock, msg) {
 
     // 6. REMOVER NOVATO DO GRUPO
     await sock.sendMessage(from, { text: `ℹ️ Removendo @${novatoLid.split('@')[0]} do grupo...`, mentions: [novatoLid] });
-    //await sock.groupParticipantsUpdate(from, [novatoLid], 'remove');
+    await sock.groupParticipantsUpdate(from, [novatoLid], 'remove');
     
     // 7. FEEDBACK FINAL no grupo
     await sock.sendMessage(from, { react: { text: '✅', key: msg.key } });
