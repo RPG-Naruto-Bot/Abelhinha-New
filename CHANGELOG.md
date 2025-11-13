@@ -2,6 +2,13 @@
 
 Todas as mudanças notáveis neste projeto são documentadas neste arquivo.
 
+## [1.4.2](https://github.com/RPG-Naruto-Bot/Abelhinha-New/compare/v1.4.1...v1.4.2) (2025-11-13)
+
+
+### Bug Fixes
+
+* **recrutamento:** remoçao automática ao receber fichas foi descomentada ([3ccf7a1](https://github.com/RPG-Naruto-Bot/Abelhinha-New/commit/3ccf7a107d093e4dfd10542f9b7329680de0519d))
+
 ## [1.4.1](https://github.com/RPG-Naruto-Bot/Abelhinha-New/compare/v1.4.0...v1.4.1) (2025-11-13)
 
 
