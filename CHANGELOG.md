@@ -2,6 +2,13 @@
 
 Todas as mudanças notáveis neste projeto são documentadas neste arquivo.
 
+# [1.3.0](https://github.com/RPG-Naruto-Bot/Abelhinha-New/compare/v1.2.0...v1.3.0) (2025-11-13)
+
+
+### Features
+
+* **deploy:** Adiciona Watchtower para auto-deploy passivo ([0b9619d](https://github.com/RPG-Naruto-Bot/Abelhinha-New/commit/0b9619dded5eb1266568ca08be139e8bce1473c0))
+
 # [1.2.0](https://github.com/RPG-Naruto-Bot/Abelhinha-New/compare/v1.1.0...v1.2.0) (2025-11-13)
 
 
