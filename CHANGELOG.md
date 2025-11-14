@@ -2,6 +2,13 @@
 
 Todas as mudanças notáveis neste projeto são documentadas neste arquivo.
 
+## [1.4.3](https://github.com/RPG-Naruto-Bot/Abelhinha-New/compare/v1.4.2...v1.4.3) (2025-11-14)
+
+
+### Bug Fixes
+
+* **recrutamento:** corrigindo paralelismo e possível condicao de corrida ([b8b39dc](https://github.com/RPG-Naruto-Bot/Abelhinha-New/commit/b8b39dce41c20d38e94a97d86ab9ee67c2a18723))
+
 ## [1.4.2](https://github.com/RPG-Naruto-Bot/Abelhinha-New/compare/v1.4.1...v1.4.2) (2025-11-13)
 
 
