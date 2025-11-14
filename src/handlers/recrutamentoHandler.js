@@ -8,6 +8,7 @@ const andamentoClasCmd = require('../commands/recrutamento/andamento_clas.js');
 const andamentoPlayersCmd = require('../commands/recrutamento/andamento_players.js');
 const { executarExportarContatos } = require('../commands/recrutamento/exportar.js');
 const { executarProcessarManual } = require('../commands/recrutamento/registrar.js');
+const { executarAnularFicha } = require('../commands/recrutamento/anular.js');
 // const { executarMenuAdmin } = require('../commands/recrutamento/menu.js');
 
 // Mapeia comandos (e aliases) para suas respectivas funções
@@ -25,6 +26,7 @@ const commandMap = {
         throw new Error('Comando inválido. Use:\n*!andamento clas*\n*!andamento players*');
     },
     '!exportar': executarExportarContatos,
+    '!anular': executarAnularFicha,
     // '!menu': executarMenuAdmin,
     // '!ajuda': executarMenuAdmin,
 };

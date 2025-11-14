@@ -151,6 +151,47 @@ function saveFicha(targetJid, dadosFicha) {
 }
 
 /**
+ * Remove uma ficha do banco de dados usando o JID.
+ * @param {string} targetJid O JID do usuário (ex: '5543...@s.whatsapp.net')
+ * @returns {Promise<void>}
+ */
+function deleteFicha(targetJid) {
+    return new Promise((resolve, reject) => {
+        // Conecta ao mesmo banco de dados
+        const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE, (err) => {
+            if (err) {
+                console.error('[DB][deleteFicha] Erro ao conectar ao SQLite:', err.message);
+                return reject(new Error(`Erro ao conectar ao DB: ${err.message}`));
+            }
+        });
+
+        const sql = `DELETE FROM fichas WHERE jid = ?;`;
+
+        db.run(sql, [targetJid], function (err) {
+            // Fecha a conexão, não importa o que aconteça
+            db.close((closeErr) => {
+                if (closeErr) { console.error('[DB][deleteFicha] Erro ao fechar conexão:', closeErr.message); }
+            });
+
+            if (err) {
+                console.error('[DB][deleteFicha] Erro ao executar DELETE:', err.message);
+                return reject(new Error(`Erro ao deletar do DB: ${err.message}`));
+            }
+
+            // 'this.changes' nos diz quantas linhas foram afetadas.
+            // Se for 0, é porque o JID não foi encontrado.
+            if (this.changes === 0) {
+                console.warn(`[DB][deleteFicha] Tentativa de anular JID não encontrado: ${targetJid}`);
+                return reject(new Error("Esse usuário não possui uma ficha no banco de dados."));
+            }
+
+            console.log(`[DB][deleteFicha] Ficha removida com sucesso para JID: ${targetJid}. Linhas afetadas: ${this.changes}`);
+            resolve(); // Sucesso!
+        });
+    });
+}
+
+/**
  * Busca os últimos N resultados brutos de missões salvos.
  * @returns {Promise<Array<object>>} Uma Promise que resolve com um ARRAY de missões.
  */
@@ -238,6 +279,7 @@ module.exports = {
     getAllFichas,
     getFichasByTimestamp,
     saveFicha,
+    deleteFicha,
     saveMissaoConcluida,
     getMissoesConcluidas
 };
