@@ -2,6 +2,13 @@
 
 Todas as mudanças notáveis neste projeto são documentadas neste arquivo.
 
+## [1.5.2](https://github.com/RPG-Naruto-Bot/Abelhinha-New/compare/v1.5.1...v1.5.2) (2025-11-14)
+
+
+### Bug Fixes
+
+* **recrutamento:** mudando a mensagem de confirmação, pois suspeito que ela esteja ativando o aprovamento automático de forma acidental ([857538c](https://github.com/RPG-Naruto-Bot/Abelhinha-New/commit/857538c3b2ecd7fc69e00791dd2fd55b065f3b46))
+
 ## [1.5.1](https://github.com/RPG-Naruto-Bot/Abelhinha-New/compare/v1.5.0...v1.5.1) (2025-11-14)
 
 

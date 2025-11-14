@@ -1,6 +1,6 @@
 {
   "name": "abelinha-v2",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "Bot modular de RPG/gestão de recrutas com automação, minigames e controle de fichas para WhatsApp",
   "main": "index.js",
   "scripts": {
