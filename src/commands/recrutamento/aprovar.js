@@ -84,7 +84,7 @@ async function executarAprovarAutomatico(sock, msg) {
 
         // 9. ENVIAR FEEDBACK FINAL
         await sock.sendMessage(from, {
-            text: `✅ Ficha processada e aprovada automaticamente!`
+            text: `Processado e aprovado automaticamente!\n\n👤 Nome: *${dadosParaSalvar.nome}*\n📅 Data: *${dadosParaSalvar.data}*\n📝 Registrado por: *${dadosParaSalvar.registradoPorJid}*`,
         });
 
     } catch (erro) {
