@@ -31,6 +31,14 @@ function getMessageText(message) {
 }
 
 async function routeMessage(sock, msg) {
+    // ❗ FILTRO ANTI-DUPLICAÇÃO AQUI
+    // Ignore mensagens extendedTextMessage que não são reply
+    if (
+        msg.message?.extendedTextMessage &&
+        !msg.message?.extendedTextMessage?.contextInfo?.quotedMessage
+    ) {
+        return; // ignora duplicata
+    }
     const text = getMessageText(msg.message);
     const remoteJid = msg.key.remoteJid;
     const senderJid = msg.key.participant || remoteJid;
