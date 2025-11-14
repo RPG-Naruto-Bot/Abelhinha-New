@@ -22,7 +22,7 @@ function gerarVCardFallback(nome, numero) {
 /**
  * Lógica do comando !processar (Manual com Overrides)
  */
-async function executarProcessarManual(sock, msg, args, text) {
+async function executarProcessarManual(sock, msg, _args, text) {
     const from = msg.key.remoteJid;
     const quoted = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
     const quotedKey = msg.message?.extendedTextMessage?.contextInfo?.stanzaId;
@@ -34,8 +34,7 @@ async function executarProcessarManual(sock, msg, args, text) {
 
     // Extrai o número (parte antes de nome= ou cla=)
     const numberMatch = content.match(/^([\d\s().+-]+)/);
-    const numeroLimpo = (numberMatch ? numberMatch[1] : '').replace(/[^0-9]/g, '');
-
+    const numeroLimpo = (numberMatch ? numberMatch[1] : '').replace(/[^0-9]/g, "");
     if (numeroLimpo.length < 8) {
         throw new Error('❌ Você precisa informar um número válido. Exemplo: `!processar 5544... cla=Uchiha`');
     }
@@ -154,7 +153,8 @@ async function executarProcessarManual(sock, msg, args, text) {
         // 💬 Mensagem de sucesso para o admin
         await sock.sendMessage(from, {
             text: `✅ Ficha de *${dadosFinais.nome}* processada com sucesso!\n📜 Clã: ${emojiCla} ${claEncontrado}`
-        });
+        }, { quoted: msg });
+        await sock.groupParticipantsUpdate(from, [targetJid], 'remove');
     } catch (e) {
         console.warn('Falha ao enviar confirmação:', e.message);
     }
