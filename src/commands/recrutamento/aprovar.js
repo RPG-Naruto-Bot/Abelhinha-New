@@ -20,73 +20,80 @@ function gerarVCardFallback(nome, numero) {
  */
 async function executarAprovarAutomatico(sock, msg) {
     const from = msg.key.remoteJid; // JID do Grupo
+    let nomeParaLogs = "Novato (erro no parse)"; // Fallback para o catch
 
-    // 1. OBTER O JID DO NOVATO (que é o autor desta mensagem)
-    const novatoLid = msg.key.participant;
-    if (!novatoLid) {
-        throw new Error("Falha automática: Não foi possível identificar o autor da ficha.");
-    }
-
-    // 2. BUSCAR METADADOS PARA ENCONTRAR O NÚMERO REAL
-    const metadata = await sock.groupMetadata(from);
-    const participantInfo = metadata.participants.find(p => p.id === novatoLid);
-
-    const novatoJid = participantInfo?.phoneNumber; // O número real!
-    if (!novatoJid) {
-        throw new Error(`Falha automática: O usuário ${novatoLid} já saiu do grupo.`);
-    }
-    const numeroLimpo = novatoJid.split('@')[0];
-
-    // 3. PARSEAR A FICHA (usando seu parser global)
-    // O parser.js já extrai o clã (pelo texto) e o emojiCla
-    const textoFicha = parser.extractText(msg.message);
-    const dadosParseados = parser.parseFicha(textoFicha);
-    if (dadosParseados.error) {
-        throw new Error(`Falha automática: ${dadosParseados.error}`);
-    }
-
-    // 4. SALVAR NO BANCO DE DADOS
-    const dadosParaSalvar = {
-        nome: dadosParseados.nome,
-        cla: dadosParseados.cla,
-        emojiCla: dadosParseados.emojiCla,
-        recrutadoPorTexto: dadosParseados.recrutadoPorTexto || 'Não informado',
-        registradoPorJid: "AUTOMÁTICO", // Identifica que foi o bot
-        data: moment().tz('America/Sao_Paulo').format('DD/MM/YYYY'),
-        timestamp: Date.now(),
-        vcard: gerarVCardFallback(dadosParseados.nome, numeroLimpo)
-    };
+    // O 'TRY' COMEÇA AQUI, NO TOPO DA FUNÇÃO
     try {
-        // 1. SALVAR NO BANCO DE DADOS
-        // (ESPERA o DB confirmar)
+        // 1. OBTER O JID DO NOVATO (que é o autor desta mensagem)
+        const novatoLid = msg.key.participant;
+        if (!novatoLid) {
+            throw new Error("Falha automática: Não foi possível identificar o autor da ficha.");
+        }
+
+        // 2. BUSCAR METADADOS PARA ENCONTRAR O NÚMERO REAL
+        const metadata = await sock.groupMetadata(from);
+        const participantInfo = metadata.participants.find(p => p.id === novatoLid);
+
+        const novatoJid = participantInfo?.phoneNumber; // O número real!
+        
+        // *** A SUA VERIFICAÇÃO, AGORA DENTRO DO TRY ***
+        if (!novatoJid) {
+            // Isso agora joga o erro DIRETAMENTE para o 'catch' lá embaixo
+            throw new Error(`Falha automática: O usuário @${novatoLid.split('@')[0]} já saiu do grupo.`);
+        }
+        const numeroLimpo = novatoJid.split('@')[0];
+
+        // 3. PARSEAR A FICHA
+        const textoFicha = parser.extractText(msg.message);
+        const dadosParseados = parser.parseFicha(textoFicha);
+        if (dadosParseados.error) {
+            // Isso também joga o erro DIRETAMENTE para o 'catch'
+            throw new Error(`Falha automática: ${dadosParseados.error}`);
+        }
+        
+        // Se o parse funcionou, atualizamos o nome para o log
+        nomeParaLogs = dadosParseados.nome || "Nome não encontrado";
+
+        // 4. SALVAR NO BANCO DE DADOS
+        const dadosParaSalvar = {
+            nome: dadosParseados.nome,
+            cla: dadosParseados.cla,
+            emojiCla: dadosParseados.emojiCla,
+            recrutadoPorTexto: dadosParseados.recrutadoPorTexto || 'Não informado',
+            registradoPorJid: "AUTOMÁTICO",
+            data: moment().tz('America/Sao_Paulo').format('DD/MM/YYYY'),
+            timestamp: Date.now(),
+            vcard: gerarVCardFallback(dadosParseados.nome, numeroLimpo)
+        };
+        
+        // ----------------------------------------------------
+        //      INÍCIO DO FLUXO SÍNCRONO (QUE JÁ ESTAVA OK)
+        // ----------------------------------------------------
+
+        // 5. SALVAR NO BANCO DE DADOS
         await db.saveFicha(novatoJid, dadosParaSalvar);
 
-        // 2. AVISAR SOBRE A REMOÇÃO
-        // (ESPERA o WhatsApp enviar a msg)
+        // 6. AVISAR SOBRE A REMOÇÃO
         await sock.sendMessage(from, { text: `ℹ️ Removendo @${novatoLid.split('@')[0]} do grupo...`, mentions: [novatoLid] });
 
-        // 3. REMOVER NOVATO DO GRUPO
-        // (ESPERA o WhatsApp confirmar a remoção)
+        // 7. REMOVER NOVATO DO GRUPO
         await sock.groupParticipantsUpdate(from, [novatoLid], 'remove');
 
-        // 4. REAGIR À MENSAGEM ORIGINAL
-        // (ESPERA o WhatsApp confirmar a reação)
+        // 8. REAGIR À MENSAGEM ORIGINAL
         await sock.sendMessage(from, { react: { text: '✅', key: msg.key } });
 
-        // 5. ENVIAR FEEDBACK FINAL
-        // (ESPERA o WhatsApp enviar a msg final)
+        // 9. ENVIAR FEEDBACK FINAL
         await sock.sendMessage(from, {
-            text: `✅ Ficha de *${dadosParaSalvar.nome}* (${dadosParaSalvar.cla} ${dadosParaSalvar.emojiCla}) processada e aprovada automaticamente!`
+            text: `✅ Ficha processada e aprovada automaticamente!`
         });
 
     } catch (erro) {
-        // SE QUALQUER ETAPA ACIMA FALHAR, ELE PULA PARA CÁ
-        console.error("Falha grave no processo síncrono da ficha:", erro);
+        // AGORA ESTE CATCH PEGA *QUALQUER* ERRO DA FUNÇÃO
+        console.error(`Falha grave no processo síncrono da ficha [${nomeParaLogs}]:`, erro);
 
-        // É crucial avisar no grupo que algo deu errado, 
-        // já que o processo foi interrompido.
+        // Avisa no grupo EXATAMENTE o que deu errado (seja do parser, do usuário que saiu, etc.)
         await sock.sendMessage(from, {
-            text: `❌ Ops! Ocorreu um erro no processamento da ficha de *${dadosParaSalvar.nome}*. O processo foi interrompido. Verifique o console.`
+            text: `❌ Ops! Ocorreu um erro ao processar a ficha.\n\n*Motivo:* ${erro.message}`
         });
     }
 }
