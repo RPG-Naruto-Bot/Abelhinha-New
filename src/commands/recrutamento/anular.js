@@ -5,32 +5,44 @@
 const db = require('../../../utils/database.js');  
 
 /**
- * Worker para o comando !anular
+ * Worker para o comando !anular <numero>
  * (O handler já verificou se o usuário é admin)
  */
 async function executarAnularFicha(sock, msg, args) {
     const from = msg.key.remoteJid;
     const senderJid = msg.key.participant;
 
-    // 1. OBTER O ALVO (via menção)
-    const mentionedJid = msg.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0];
+    // 1. OBTER O NÚMERO
+    // 'args' é um array (ex: ["+55", "35", "9724-7537"])
+    // 'args.join(" ")' junta eles de volta (ex: "+55 35 9724-7537")
+    const numeroSujo = args.join(' ');
 
-    if (!mentionedJid) {
-        // Joga um erro que o handler.js vai pegar, formatar e enviar
-        throw new Error('Formato incorreto. Você precisa *mencionar* o usuário cuja ficha será anulada.\n\nEx: `!anular @usuario`');
+    if (!numeroSujo) {
+        // Joga um erro que o handler.js vai pegar
+        throw new Error('Formato incorreto. Use: `!anular <numero>`\n\nEx: `!anular +55 35 9724-7537`');
     }
 
-    // 2. EXECUTAR A LÓGICA DE ANULAÇÃO
-    // A função 'deleteFicha' vai jogar um erro se não encontrar o usuário,
-    // e o handler.js vai pegar esse erro também.
-    await db.deleteFicha(mentionedJid);
+    // 2. LIMPAR O NÚMERO
+    // '.replace(/\D/g, '')' remove TUDO que não for dígito
+    // (remove o '+', os espaços ' ' e o hífen '-')
+    const numeroLimpo = numeroSujo.replace(/\D/g, ''); // Resultado: "553597247537"
+
+    if (numeroLimpo.length < 10) {
+        throw new Error('Número inválido. Forneça o número completo com DDI e DDD (ex: `+55 35...`)');
+    }
+
+    // 3. FORMATAR PARA JID
+    const targetJid = `${numeroLimpo}@s.whatsapp.net`;
+
+    // 4. EXECUTAR A LÓGICA DE ANULAÇÃO
+    // O 'db.deleteFicha' vai dar 'reject' se não encontrar,
+    // e o handler.js vai pegar esse erro.
+    await db.deleteFicha(targetJid);
     
-    // 3. FEEDBACK DE SUCESSO
-    // O handler só envia feedback de erro, então
-    // o feedback de sucesso é responsabilidade do comando.
+    // 5. FEEDBACK DE SUCESSO
     await sock.sendMessage(from, { 
-        text: `✅ Ficha do usuário @${mentionedJid.split('@')[0]} foi anulada e removida do banco de dados com sucesso.`,
-        mentions: [mentionedJid, senderJid] // Menciona o alvo e o admin
+        text: `✅ Ficha do usuário *${targetJid}* foi anulada e removida do banco de dados com sucesso.`,
+        mentions: [senderJid] // Menciona o admin que executou
     });
 }
 
