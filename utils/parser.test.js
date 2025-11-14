@@ -219,7 +219,7 @@ describe('Testes do normalizeCla', () => {
     { input: 'UcHiHa', expected: { claEncontrado: 'uchiha', emojiCla: '㊗' } }, // Testando case-insensitivity
 
     // --- Casos de Falha (Baseado nos seus logs) ---
-    { input: 'hyuuga', expected: { claEncontrado: null, emojiCla: '' } }, // Log: "SEM MATCH ... Input 'hyuuga' -> ... Emoji ''"
+    { input: 'hyuuga', expected: { claEncontrado: 'hyuuga', emojiCla: '☯' } },
     { input: 'ClaInvalido', expected: { claEncontrado: null, emojiCla: '' } }, // Assumindo que o default é emoji ''
     { input: '', expected: { claEncontrado: null, emojiCla: '' } }, // Log: "SEM MATCH ... Input '' -> ... Emoji ''"
     { input: null, expected: { claEncontrado: null, emojiCla: '' } }, // Testando input nulo

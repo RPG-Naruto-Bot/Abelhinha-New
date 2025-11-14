@@ -72,6 +72,7 @@ async function executarAprovarAutomatico(sock, msg) {
 
         // 5. SALVAR NO BANCO DE DADOS
         await db.saveFicha(novatoJid, dadosParaSalvar);
+        console.log(`Ficha automática salva para ${nomeParaLogs} [${novatoJid}]`);
 
         // 6. AVISAR SOBRE A REMOÇÃO
         await sock.sendMessage(from, { text: `ℹ️ Removendo @${novatoLid.split('@')[0]} do grupo...`, mentions: [novatoLid] });
