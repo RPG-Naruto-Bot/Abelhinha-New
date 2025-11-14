@@ -2,6 +2,13 @@
 
 Todas as mudanças notáveis neste projeto são documentadas neste arquivo.
 
+## [1.5.1](https://github.com/RPG-Naruto-Bot/Abelhinha-New/compare/v1.5.0...v1.5.1) (2025-11-14)
+
+
+### Bug Fixes
+
+* **recrutamento:** novo comando para anular contatos fazendo a remoção no banco de dados (!anular) ([ffffe0c](https://github.com/RPG-Naruto-Bot/Abelhinha-New/commit/ffffe0c507e38988d1c5f03b0ee18eb9eab46f9e))
+
 # [1.5.0](https://github.com/RPG-Naruto-Bot/Abelhinha-New/compare/v1.4.5...v1.5.0) (2025-11-14)
 
 
