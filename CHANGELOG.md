@@ -2,6 +2,14 @@
 
 Todas as mudanças notáveis neste projeto são documentadas neste arquivo.
 
+## [1.5.4](https://github.com/RPG-Naruto-Bot/Abelhinha-New/compare/v1.5.3...v1.5.4) (2025-11-14)
+
+
+### Bug Fixes
+
+* **recrutamento): chore(configs:** bug de remoção manual corrigido, novo cla adicionado, testes unitários alterados para o novo cla não quebrar denovo ([0fb4ff3](https://github.com/RPG-Naruto-Bot/Abelhinha-New/commit/0fb4ff3d04247f2f936c12fba367c9656b6d2a2a))
+* **recrutamento:** bug de não remover após processamento manual ([77fc7dd](https://github.com/RPG-Naruto-Bot/Abelhinha-New/commit/77fc7dd9e41e7c2545e709002e32568e5184ac69))
+
 ## [1.5.3](https://github.com/RPG-Naruto-Bot/Abelhinha-New/compare/v1.5.2...v1.5.3) (2025-11-14)
 
 
