@@ -2,6 +2,13 @@
 
 Todas as mudanças notáveis neste projeto são documentadas neste arquivo.
 
+## [1.5.3](https://github.com/RPG-Naruto-Bot/Abelhinha-New/compare/v1.5.2...v1.5.3) (2025-11-14)
+
+
+### Bug Fixes
+
+* **recrutamento:** mudando o routeMessage para ignorar mensagens do tipo extended, acredito que seja esse o problema das respostas duplicadas ([4e09b6c](https://github.com/RPG-Naruto-Bot/Abelhinha-New/commit/4e09b6c474e4ea4e9ee2a4ca6f07ef8c639836c7))
+
 ## [1.5.2](https://github.com/RPG-Naruto-Bot/Abelhinha-New/compare/v1.5.1...v1.5.2) (2025-11-14)
 
 
