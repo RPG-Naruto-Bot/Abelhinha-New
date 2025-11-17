@@ -2,6 +2,18 @@
 
 Todas as mudanças notáveis neste projeto são documentadas neste arquivo.
 
+# [1.6.0](https://github.com/RPG-Naruto-Bot/Abelhinha-New/compare/v1.5.4...v1.6.0) (2025-11-17)
+
+
+### Bug Fixes
+
+* **infos:** Adicionados os comandos para envio de informacoes gerais para as vilas do rpg ([a3c9ae7](https://github.com/RPG-Naruto-Bot/Abelhinha-New/commit/a3c9ae7a812dfb81e4004a0e574812cc129fba5a))
+
+
+### Features
+
+* **infos:** Adicionados os comandos para envio de informacoes gerais para as vilas do rpg ([610447c](https://github.com/RPG-Naruto-Bot/Abelhinha-New/commit/610447ca4ccaa9614bd0f5a7191411130176acf0))
+
 ## [1.5.4](https://github.com/RPG-Naruto-Bot/Abelhinha-New/compare/v1.5.3...v1.5.4) (2025-11-14)
 
 
