@@ -16,7 +16,7 @@ const {
     getMenu,
     // ... importe todas as outras 9 funções aqui:
     // getCronogramaRPG, getLoja, etc.
-} = require('../commands/respostas/loja.js'); // Ajuste o caminho conforme sua estrutura!
+} = require(' C:\Users\MASTER\Downloads\Abelhinha-New-main\Abelhinha-New-main\src\commands\respostas'); // Ajuste o caminho conforme sua estrutura!
 
 // 2. Cria o MAPEAMENTO de Comandos (A melhor prática de Código Limpo)
 // Chave: O comando que o usuário digita (ex: '!katana')
@@ -82,5 +82,6 @@ async function processCommands(sock, msg, text) {
 }
 
 module.exports = { processCommands }; // Exporta para ser usado no seu arquivo principal
+
 
 
