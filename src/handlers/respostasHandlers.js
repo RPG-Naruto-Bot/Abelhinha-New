@@ -30,7 +30,7 @@ const commandsMap = {
     '!cronocramarpg': getCronogramaRPG,
     '!cronocramajuiz': getCronogramaJuiz,
     '!cronocramamissao': getCronogramaMissao,
-    '!lojaloja': getLoja,
+    '!loja': getLoja,
     '!compraloja': getCompraLoja,
     '!bemvindo': getBemVindo,
     '!menu': getMenu
@@ -82,3 +82,4 @@ async function processCommands(sock, msg, text) {
 }
 
 module.exports = { processCommands }; // Exporta para ser usado no seu arquivo principal
+
