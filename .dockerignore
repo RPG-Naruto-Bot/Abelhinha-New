@@ -1,0 +1,37 @@
+# Arquivos sensíveis e de ambiente
+# NUNCA devem estar na imagem
+.env
+
+# Pastas de dados, sessão e logs
+# Serão montadas como volumes, não buildadas
+auth_info_baileys/
+data/
+temp/
+logs/
+
+# Dependências locais (o Docker vai cuidar disso)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Configurações de Teste e Dev
+# Não são necessárias em produção
+.eslintrc.json
+eslint.config.mjs
+jest.config.js
+coverage/
+*.test.js
+
+# Arquivos do Git e do Editor
+.git/
+.gitignore
+.vscode/
+
+# Arquivos do próprio Docker
+Dockerfile
+.dockerignore
+
+# Documentação e arquivos de texto
+*.md
+*.txt

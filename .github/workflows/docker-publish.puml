@@ -1,0 +1,29 @@
+@startuml Fluxo
+title Fluxo CI/CD Abelinha-V2 com Docker Hub e Watchtower
+
+actor Developer as Dev
+participant "GitHub Repository" as GH
+participant "GitHub Actions Runner" as Actions
+participant "Docker Hub" as Docker
+participant "Servidor com Watchtower" as Server
+
+Dev -> GH : push na branch main
+GH -> Actions : Aciona workflow
+Actions -> Actions : Build da imagem Docker
+Actions -> Actions : Tag: latest, commit SHA, branch
+Actions -> Docker : Push da imagem com todas as tags
+Docker -> Server : Watchtower detecta nova tag 'latest'
+Server -> Server : Puxa a imagem 'latest' e reinicia container
+Server -> Server : Container usa volumes persistentes (auth_info_baileys, data, temp, logs)
+Server -> Server : Bot executa normalmente
+
+note right of Server
+Volumes persistentes garantem:
+- creds.json
+- banco SQLite
+- temp files
+- logs
+não são sobrescritos
+end note
+
+@enduml

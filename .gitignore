@@ -1,0 +1,31 @@
+# Dependências do Node (Correto)
+/node_modules
+
+# Arquivos de sessão do Baileys (Correto)
+# garante que a pasta e todo o conteúdo sejam ignorados
+/auth_info_baileys/
+auth_info_baileys/**
+
+# Arquivos de ambiente e segredos (Correto)
+.env
+.env.local
+.env.*.local
+
+# Banco de Dados SQLite (Correto)
+/data/rpg_data.db
+/data/rpg_data.db-journal
+
+# Relatórios de teste do Jest (NOVO)
+/coverage/
+
+# Arquivos de sistema operacional (Recomendado)
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Arquivos de build (Se você usar TypeScript um dia)
+/dist
+*.js.map
