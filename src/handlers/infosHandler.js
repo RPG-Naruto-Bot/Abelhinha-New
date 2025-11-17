@@ -16,7 +16,7 @@ const {
     getMenu,
     // ... importe todas as outras 9 funções aqui:
     // getCronogramaRPG, getLoja, etc.
-} = require('../commands/respostas'); // Ajuste o caminho conforme sua estrutura!
+} = require('../commands/infos/respostas'); // Ajuste o caminho conforme sua estrutura!
 
 // 2. Cria o MAPEAMENTO de Comandos (A melhor prática de Código Limpo)
 // Chave: O comando que o usuário digita (ex: '!katana')
