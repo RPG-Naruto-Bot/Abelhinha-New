@@ -7,6 +7,8 @@
 // 1. Importa handlers com caminhos corrigidos (tudo minúsculo)
 const { handlerRecrutamento } = require('./handlers/recrutamentoHandler');
 const { handlerDIJ, isUserInBatchMode } = require('./handlers/dijHandler');
+const { handerInfos } = require('./handlers/infosHandler');
+
 
 // Importa o parser (necessário para a detecção)
 const config = require('./configs/ids-groups.json');
@@ -83,6 +85,12 @@ const commandRoutes = [
         },
         action: handlerDIJ
     },
+    {
+        name: 'Rota de Informações Gerais para Grupos de Vila',
+        description: 'Processa comandos gerais em grupos de vila.',
+        condition: (_msg, remoteJid, _text) => config.allowedVillageGroups.includes(remoteJid),
+        action: handerInfos
+    }
 ];
 
 module.exports = { commandRoutes };
