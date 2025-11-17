@@ -2,6 +2,14 @@
 
 Todas as mudanças notáveis neste projeto são documentadas neste arquivo.
 
+# [1.7.0](https://github.com/RPG-Naruto-Bot/Abelhinha-New/compare/v1.6.2...v1.7.0) (2025-11-17)
+
+
+### Features
+
+* **infos:** Atualiza regras de RPG e conteúdo do menu ([29e0501](https://github.com/RPG-Naruto-Bot/Abelhinha-New/commit/29e0501cc4377e56ff02f9f32f11df460d483ba1))
+* **infos:** Atualiza regras de RPG e conteúdo do menu ([79e561d](https://github.com/RPG-Naruto-Bot/Abelhinha-New/commit/79e561dbeb57f12dd65670f04f354cd44ffd5f4e))
+
 ## [1.6.2](https://github.com/RPG-Naruto-Bot/Abelhinha-New/compare/v1.6.1...v1.6.2) (2025-11-17)
 
 
