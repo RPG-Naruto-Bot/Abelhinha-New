@@ -2,6 +2,13 @@
 
 Todas as mudanças notáveis neste projeto são documentadas neste arquivo.
 
+## [1.6.2](https://github.com/RPG-Naruto-Bot/Abelhinha-New/compare/v1.6.1...v1.6.2) (2025-11-17)
+
+
+### Bug Fixes
+
+* **infos:** rota de infos com filtros mais severos ([80ef877](https://github.com/RPG-Naruto-Bot/Abelhinha-New/commit/80ef8774e84d0d25468c909d5e723c4bd5eb3f56))
+
 ## [1.6.1](https://github.com/RPG-Naruto-Bot/Abelhinha-New/compare/v1.6.0...v1.6.1) (2025-11-17)
 
 
