@@ -27,9 +27,9 @@ const commandsMap = {
     '!regraslutas': getRegrasLutas,
     '!regrasrpg': getRegrasRpg,
     '!regrasparalisia': getRegrasParalisia,
-    '!cronocramarpg': getCronogramaRPG,
-    '!cronocramajuiz': getCronogramaJuiz,
-    '!cronocramamissao': getCronogramaMissao,
+    '!cronogramarpg': getCronogramaRPG,
+    '!cronogramajuiz': getCronogramaJuiz,
+    '!cronogramamissao': getCronogramaMissao,
     '!loja': getLoja,
     '!compraloja': getCompraLoja,
     '!bemvindo': getBemVindo,
@@ -82,4 +82,5 @@ async function processCommands(sock, msg, text) {
 }
 
 module.exports = { processCommands }; // Exporta para ser usado no seu arquivo principal
+
 
