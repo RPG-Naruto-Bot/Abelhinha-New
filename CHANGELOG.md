@@ -2,6 +2,13 @@
 
 Todas as mudanças notáveis neste projeto são documentadas neste arquivo.
 
+## [1.6.1](https://github.com/RPG-Naruto-Bot/Abelhinha-New/compare/v1.6.0...v1.6.1) (2025-11-17)
+
+
+### Bug Fixes
+
+* **infos:** Correcao dos caminhos de absolutos para relativos ([8d40971](https://github.com/RPG-Naruto-Bot/Abelhinha-New/commit/8d4097125187e7f66eec0e5ae37b8527c3883efe))
+
 # [1.6.0](https://github.com/RPG-Naruto-Bot/Abelhinha-New/compare/v1.5.4...v1.6.0) (2025-11-17)
 
 
