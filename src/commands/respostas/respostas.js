@@ -5,7 +5,7 @@
 // ===================================================
 
 const getKatana = () => {
-    return `*💫(-☢' Regras da Katana'☢-)💫* 
+  return `*💫(-☢' Regras da Katana'☢-)💫* 
 
 *💥💢 - 🈂 Gennin 🈂 - 💢💥*
 
@@ -13,7 +13,7 @@ const getKatana = () => {
 
 *✨2⃣: Ativação sem nenhuma imunidade.*
 
-*✨3⃣: Defesa/Ataque {70%🔹🔺}  ou Taijutsu {130%🔺} fica ao seu critério.*
+*✨3⃣: Defesa/Ataque {70%🔹🔺} ou Taijutsu {130%🔺} fica ao seu critério.*
 
 *💥💢 - ✳ Chunnin ✳ - 💢💥*
 
@@ -66,7 +66,7 @@ const getKatana = () => {
 };
 
 const getContrato = () => {
-    return `💫 • 🕉 ❰  Contrato De Sangue  ❱ 🕉 • 💫
+  return `💫 • 🕉 ❰ Contrato De Sangue ❱ 🕉 • 💫
 
 •➖➖❰✨ ⟦• ✞ ❲🕉❳ ✞ •⟧ ✨❱➖➖•
 
@@ -82,9 +82,9 @@ Ou
 
 ✳️➜ Patente Chunnin :
 
-千 1️⃣ • Ativação - Aumento de 50%🔺 No Contrato E  Em Taijustu, Reduz 10%🔻, Consome 10% 🔹 Para Ativar.
+千 1️⃣ • Ativação - Aumento de 50%🔺 No Contrato E Em Taijustu, Reduz 10%🔻, Consome 10% 🔹 Para Ativar.
 
-千 2️⃣ • Paralisia  (70%🔹/70%🔺), Somente O Dano Do Contrato Funciona.
+千 2️⃣ • Paralisia (70%🔹/70%🔺), Somente O Dano Do Contrato Funciona.
 
 千 3️⃣ • Passa barreiras de 50%🔹Qualquer Elemento( 80%🔹/120%🔺) Somente O Dano Do Contrato Funciona.
 
@@ -117,17 +117,8 @@ Ou
 •➖➖❰✨ ⟦• ✞ ❲🕉❳ ✞ •⟧ ✨❱➖➖•.`;
 };
 
-// ... e assim por diante para todos os 12 comandos.
-
-// Crie funções similares para:
-// getCronogramaRPG, getCronogramaJuiz, getCronogramaMissao,
-// getLoja, getCompraLoja, getRegrasRPG, getRegrasLutas,
-// getRegrasParalisia, getBemVindo, getFicha (este será especial, veja a seção 4!)
-
-// Exemplo da função !regraslutas
-
 const getRegrasLutas = () => {
-    return `*✨💥👊' Regras de Lutas '👊💥✨*
+  return `*✨💥👊' Regras de Lutas '👊💥✨*
 
 _*Lembrando que essas são regras gerais para os jutsus do sistema. Qualquer mudança ou exceção estará explicado no próprio card do jutsu.*_
 *•➖♾️ ❪ 💫 ❰ ⁂ 🎶 ⁂ ❱ 💫 ❫ ♾️➖•* 
@@ -136,7 +127,7 @@ _*Lembrando que essas são regras gerais para os jutsus do sistema. Qualquer mud
 
 _➖Armadilha Mental é a única falha que funciona se for usada em primeiro ou segundo._
 
-_➖Troca de Sombra só funciona em ninjutsus a distância *(Não  funciona em clones se estiverem atacando e tbm não funciona em Ataque/Defesa lançado em primeiro).*_
+_➖Troca de Sombra só funciona em ninjutsus a distância *(Não funciona em clones se estiverem atacando e tbm não funciona em Ataque/Defesa lançado em primeiro).*_
 
 _*➖Ninjutsu a distância:* Lançar, arremessar, jutsu que mostre uma distância entre usuário e oponente._
 
@@ -170,7 +161,7 @@ _➖Fuga anti-rastreamento escapa de tudo._
 
 _➖Taijutsu Básico pode ser usado várias vezes, Tai Básico só tem os símbolos da vila na descrição._
 
-_➖Taijutsu Especial 🆚 Taijutsu Especial o que for usado primeiro vence, Tai especial possui na descrição. O símbolo  do clã e da vila._
+_➖Taijutsu Especial 🆚 Taijutsu Especial o que for usado primeiro vence, Tai especial possui na descrição. O símbolo do clã e da vila._
 
 _➖Taijutsu Especial só anula básico se ele não for de dobro de dano._
 
@@ -221,44 +212,44 @@ _➖Ativações não contam como jogada, pode ser usadas várias em um mesmo rou
 };
 
 const getRegrasRpg = () => {
-    return `💥 **REGRAS DE LUTAS** 💥
-    
-    1.  A luta só é válida com a presença do Juiz (ou um Admin).
-    2.  Duração máxima: 5 rodadas.
-    3.  Qualquer uso de trapaça resulta em desqualificação imediata.
-    
-    ❌ Proibido: Paralisia Dupla.`;
+  return `💥 **REGRAS DE LUTAS** 💥
+  
+  1. A luta só é válida com a presença do Juiz (ou um Admin).
+  2. Duração máxima: 5 rodadas.
+  3. Qualquer uso de trapaça resulta em desqualificação imediata.
+  
+  ❌ Proibido: Paralisia Dupla.`;
 };
 
 const getRegrasParalisia = () => {
-    return `*💫•🕉❰Regras de Luta❱🕉•💫*
-        _❪ •🚫❝ Paralisias ❞🚫• ❫_
+  return `*💫•🕉❰Regras de Luta❱🕉•💫*
+    _❪ •🚫❝ Paralisias ❞🚫• ❫_
 
 *•➖➖➖❰• ✞* ❲🕉❳ *✞ •❱➖➖➖•*
 
 *➜ 70/30 ❰🔺❱*
 
-❝  Vence Qualquer Paralisia Sem Dano❞
+❝ Vence Qualquer Paralisia Sem Dano❞
 
 *➜ 70/70 ❰🔺❱*
 
-❝  Vence Paralisia com 30% e Qualquer Paralisia Sem Dano❞
+❝ Vence Paralisia com 30% e Qualquer Paralisia Sem Dano❞
 
 *➜ 80/30 ❰🔺❱*
 
-❝  Vence Paralisias Sem Dano ❞
+❝ Vence Paralisias Sem Dano ❞
 
 *➜ 90/70 ❰🔺❱*
 
-❝  Vence Paralisias Sem Dano e Com 30% ❞
+❝ Vence Paralisias Sem Dano e Com 30% ❞
 
 *➜ 100/70 ❰🔺❱*
 
-❝  Vence Paralisias Sem Dano e 30%❞
+❝ Vence Paralisias Sem Dano e 30%❞
 
 *➜ 70/% ❰💔❱*
 
-❝  Vence Qualquer Paralisia Com Dano de Qualquer Chakra ❞
+❝ Vence Qualquer Paralisia Com Dano de Qualquer Chakra ❞
 
 *《❗》Extras :*
 
@@ -274,17 +265,17 @@ _➺ • Paralisia Sem Dano Vs Paralisia Sem Sem Dano se Anulam, não Importa o 
 
 *•➖➖➖❰• ✞* ❲🕉❳ *✞ •❱➖➖➖•*
 
-*Ass : 📝*    
+*Ass : 📝*  
 
-  *🌧❰-🈳 11°Rikudou 🈳-❱🌧*
+ *🌧❰-🈳 11°Rikudou 🈳-❱🌧*
  *🎴❪-⚜️' Mikael Kami '⚜️-❫🎴*
 
-  *⚡❰-♑ 12°Rikudou ♑-❱⚡*
+ *⚡❰-♑ 12°Rikudou ♑-❱⚡*
 *🎴❪-♋' Meijan Yotsuki '♋-❫🎴*`;
 };
 
 const getCronogramaRPG = () => {
-    return `🕉️⟦•💫⟮ Exames - Eventos ⟯💫•⟧🕉️
+  return `🕉️⟦•💫⟮ Exames - Eventos ⟯💫•⟧🕉️
  _🪇❪•🗓️❝ Cronograma - Novembro ❞🗓️•❫🪇_
 
 *•➖➖❰✨ ⟦• ✰ ❲🕉️❳ ✰ •⟧ ✨❱➖➖•*
@@ -303,25 +294,25 @@ const getCronogramaRPG = () => {
 
 *🎏❮ • 📆❝ 08/11/2025 ❞ 📆• ❯🎏*
 
-『  Livre em virtude ao Enem, Exame Nacional do Ensino Médio 』 ✅
+『 Livre em virtude ao Enem, Exame Nacional do Ensino Médio 』 ✅
 
 *•➖➖❰✨ ⟦• ✰ ❲🕉️❳ ✰ •⟧ ✨❱➖➖•*
 
 *📚❮ • 📆❝ 09/11/2025 ❞ 📆• ❯📚*
 
-『  Livre em virtude ao Enem, Exame Nacional do Ensino Médio 』
+『 Livre em virtude ao Enem, Exame Nacional do Ensino Médio 』
 
 *•➖➖❰✨ ⟦• ✰ ❲🕉️❳ ✰ •⟧ ✨❱➖➖•*
 
 *✳️❮ • 📆❝ 15/11/2024 ❞ 📆• ❯✳️*
 
-*Org:*『  Mel 👁️‍🗨️🔘 』  
+*Org:*『 Mel 👁️  🗨️🔘 』 
 
 *•➖➖❰✨ ⟦• ✰ ❲🕉️❳ ✰ •⟧ ✨❱➖➖•*
 
 *✴️❮ • 📆❝ 16/10/2025 ❞ 📆• ❯✴️*
 
-*Org:*『  Gaby💮🀄 』
+*Org:*『 Gaby💮🀄 』
 
 *•➖➖❰✨ ⟦• ✰ ❲🕉️❳ ✰ •⟧ ✨❱➖➖•*
 
@@ -340,14 +331,14 @@ const getCronogramaRPG = () => {
 
 *💠❮ • 📆❝ 23/11/2025 ❞ 📆• ❯💠*
 
-*Org:*『  Yukki 🎭🔘』
+*Org:*『 Yukki 🎭🔘』
  
 *•➖➖❰✨ ⟦• ✰ ❲🕉️❳ ✰ •⟧ ✨❱➖➖•*
 
 
 *🎪❮ • 📆❝ 29/11/2025 ❞ 📆• ❯🎪*
 
-*Org:*『 Livre  』
+*Org:*『 Livre 』
 
  _⁉️❪•💥❝ Sujeito A Mudanças ❞💥•❫⁉️_
 
@@ -361,17 +352,17 @@ const getCronogramaRPG = () => {
 };
 
 const getCronogramaJuiz = () => {
-    return `💥 **REGRAS DE LUTAS** 💥
-    
-    1.  A luta só é válida com a presença do Juiz (ou um Admin).
-    2.  Duração máxima: 5 rodadas.
-    3.  Qualquer uso de trapaça resulta em desqualificação imediata.
-    
-    ❌ Proibido: Paralisia Dupla.`;
+  return `💥 **REGRAS DE LUTAS** 💥
+  
+  1. A luta só é válida com a presença do Juiz (ou um Admin).
+  2. Duração máxima: 5 rodadas.
+  3. Qualquer uso de trapaça resulta em desqualificação imediata.
+  
+  ❌ Proibido: Paralisia Dupla.`;
 };
 
 const getCronogramaMissao = () => {
-    return `♍⟦•💫⟮ Missão Ninja ⟯💫•⟧♍
+  return `♍⟦•💫⟮ Missão Ninja ⟯💫•⟧♍
  🪇❪•🗓❝ Cronograma ❞🗓•❫🪇
 
 •➖➖❰✨ ⟦• ✰ ❲♍❳ ✰ •⟧ ✨❱➖➖•
@@ -391,7 +382,7 @@ const getCronogramaMissao = () => {
 •➖➖❰✨ ⟦• ✰ ❲♍❳ ✰ •⟧ ✨❱➖➖•
 📍❮ • 📋❝ Segunda-Feira ❞ 📋• ❯📍
 
-『⚔』Maria 👁️‍🗨️🃏
+『⚔』Maria 👁️  🗨️🃏
 『⚔』Narum 💎🀄️
 
 ⟦💢⟧📆❴ • 10/11/2025 • ❵ 📆⟦💢⟧
@@ -411,10 +402,10 @@ const getCronogramaMissao = () => {
 ⟦💢⟧📆❴ • 17/11/2025 • ❵ 📆⟦💢⟧
 •➖➖❰✨ ⟦• ✰ ❲♍❳ ✰ •⟧ ✨❱➖➖•
 📍❮ • 📋❝ Quinta-Feira ❞ 📋• ❯📍
-       ❮ • Dia da consciência negra • ❯
+    ❮ • Dia da consciência negra • ❯
 
 『⚔』Berlim 💎🃏
-『👥』Darling 👁️‍🗨️💠
+『👥』Darling 👁️  🗨️💠
 
 ⟦💢⟧📆❴ • 20/11/2025 • ❵ 📆⟦💢⟧
 
@@ -439,13 +430,13 @@ const getCronogramaMissao = () => {
 •➖➖❰✨ ⟦• ✰ ❲♍❳ ✰ •⟧ ✨❱➖➖•
 • ครร : 📝
 
-✨  ❪🕉⟮ ຊ Rikkudou's ຊ ⟯🕉❫   ✨
-      🎴❰°⚜️ Thais Kami ⚜️°❱🎴
-     🎴❰°⚜️ Mikael Kami ⚜️°❱🎴`;
+✨ ❪🕉⟮ ຊ Rikkudou's ຊ ⟯🕉❫  ✨
+   🎴❰°⚜️ Thais Kami ⚜️°❱🎴
+   🎴❰°⚜️ Mikael Kami ⚜️°❱🎴`;
 };
 
 const getLoja = () => {
-    return `*       💫 • 🔰❰ Loja Ninja ❱🔰 • 💫*
+  return `*    💫 • 🔰❰ Loja Ninja ❱🔰 • 💫*
 
 •➖➖❰✨ ⟦• ✞ ❲🔰❳ ✞ •⟧ ✨❱➖➖•
 💫🎊❪-🔆• Armas Ninjas •🔆-❫🎊💫
@@ -460,7 +451,7 @@ const getLoja = () => {
 
 ❪ 🔰'🍯 ❫ • Hachimitsu Kabe: Parede de Mel ✅
 
-     ❪•✨ ⌜🔰 100 Pontos 🔰⌟ ✨•❫
+   ❪•✨ ⌜🔰 100 Pontos 🔰⌟ ✨•❫
 
 •➖➖❰✨ ⟦• ✞ ❲🔰❳ ✞ •⟧ ✨❱➖➖•
 💫🎊❪-📜• Pergaminho •📜-❫🎊💫
@@ -479,10 +470,10 @@ const getLoja = () => {
 
 ❪ 🔰'🐉 ❫ • Ascensão dos dragões gêmeos ✅
 
-    ❪•✨ ⌜🔰 200 Pontos 🔰⌟ ✨•❫
+  ❪•✨ ⌜🔰 200 Pontos 🔰⌟ ✨•❫
 
 •➖➖❰✨ ⟦• ✞ ❲🔰❳ ✞ •⟧ ✨❱➖➖•
-    💫🎊❪-🚨• Rank A •🚨-❫🎊💫
+  💫🎊❪-🚨• Rank A •🚨-❫🎊💫
 
 ❪ 🔰'🔖 ❫ • Papéis Bombas ✅
 
@@ -496,7 +487,7 @@ const getLoja = () => {
 
 ❪ 🔰'📜 ❫ • Guerreiros De Tinta Nv2 ✅
 
-     ❪•✨ ⌜🔰 300 Pontos 🔰⌟ ✨•❫
+   ❪•✨ ⌜🔰 300 Pontos 🔰⌟ ✨•❫
 
 •➖➖❰✨ ⟦• ✞ ❲🔰❳ ✞ •⟧ ✨❱➖➖•
 💫🎊❪-💊• Kits Médico •💊-❫🎊💫
@@ -511,7 +502,7 @@ const getLoja = () => {
 
 ❪ 🔰'⛲ ❫ • Técnica de Elevação: Água da Vida ✅
 
-     ❪•✨ ⌜🔰 350 Pontos 🔰⌟ ✨•❫
+   ❪•✨ ⌜🔰 350 Pontos 🔰⌟ ✨•❫
 
 •➖➖❰✨ ⟦• ✞ ❲🔰❳ ✞ •⟧ ✨❱➖➖•
  💫🎊❪-♨• Kits Ninjas •♨-❫🎊💫
@@ -528,7 +519,7 @@ const getLoja = () => {
 
 ❪ 🔰'🎐 ❫ • Iryō Kitto: Hotai-Shi ⛔
 
-     ❪•✨ ⌜🔰 450 Pontos 🔰⌟ ✨•❫
+   ❪•✨ ⌜🔰 450 Pontos 🔰⌟ ✨•❫
 
 •➖➖❰✨ ⟦• ✞ ❲🔰❳ ✞ •⟧ ✨❱➖➖•
  💫🎊❪-🛠• Updates •🛠-❫🎊💫
@@ -539,41 +530,41 @@ const getLoja = () => {
 
 ❪ 🔰'🛡 ❫ • Técnica de Deslacramento: Domo de ferro segmentado ✅ 
 
-     ❪•✨ ⌜🔰 300 Pontos 🔰⌟ ✨•❫
+   ❪•✨ ⌜🔰 300 Pontos 🔰⌟ ✨•❫
 •➖➖❰✨ ⟦• ✞ ❲🔰❳ ✞ •⟧ ✨❱➖➖•
-  💫🎊❪-☢• Katanas •☢-❫🎊💫
+ 💫🎊❪-☢• Katanas •☢-❫🎊💫
 
 ❪ ☢'🗡 ❫ • Kusanagi ✅
 
 ❪ ☢'🔝 ❫ • Melhoria ✅
 
-     ❪•✨ ⌜🔰 250 Pontos 🔰⌟ ✨•❫
+   ❪•✨ ⌜🔰 250 Pontos 🔰⌟ ✨•❫
 
 •➖➖❰✨ ⟦• ✞ ❲🔰❳ ✞ •⟧ ✨❱➖➖•
-  💫🎊❪-🩸• Contrato •🩸-❫🎊💫
+ 💫🎊❪-🩸• Contrato •🩸-❫🎊💫
 
 ❪ ☢'🩸 ❫ • Contrato ✅
 
-     ❪•✨ ⌜🔰 200 Pontos 🔰⌟ ✨•❫
+   ❪•✨ ⌜🔰 200 Pontos 🔰⌟ ✨•❫
 
 ❪ 📜'🩸 ❫ • Cada Patente ✅
 
-     ❪•✨ ⌜🔰 450 Pontos 🔰⌟ ✨•❫
+   ❪•✨ ⌜🔰 450 Pontos 🔰⌟ ✨•❫
 
 •➖➖❰✨ ⟦• ✞ ❲🔰❳ ✞ •⟧ ✨❱➖➖•
  💫🎊❪-•💵 Lojas Premium 💵 •-❫🎊💫
 
-❪ 🔰'💵 ❫ •  Premium ✅
+❪ 🔰'💵 ❫ • Premium ✅
 
-      ❪•✨ ⌜🔰 2000 Pontos 🔰⌟ ✨•❫
+   ❪•✨ ⌜🔰 2000 Pontos 🔰⌟ ✨•❫
 
 ❪ 🔰'💴 ❫ • Elite ✅
 
-      ❪•✨ ⌜🔰 2500 Pontos 🔰⌟ ✨•❫
+   ❪•✨ ⌜🔰 2500 Pontos 🔰⌟ ✨•❫
 
 ❪ 🔰'💷 ❫ • Elite Premium ✅
  
-     ❪•✨ ⌜🔰 3000 Pontos 🔰⌟ ✨•❫
+   ❪•✨ ⌜🔰 3000 Pontos 🔰⌟ ✨•❫
 •➖➖❰✨ ⟦• ✞ ❲🔰❳ ✞ •⟧ ✨❱➖➖•
 
 千 • ✅ Disponível 
@@ -584,52 +575,50 @@ const getLoja = () => {
 
 • ครร : 📝
 
-🎴❰°⚜️ Thais Kami ⚜️°❱🎴`;
+🎴❰°⚜️ Thais Kami ⚜️°❱🎴`;
 };
 
 const getCompraLoja = () => {
-    return `•➖➿ ❪🔰 ⟮ ✰ 🈳 ✰ ⟯ 🔰❫ ➿➖•
+  return `•➖➿ ❪🔰 ⟮ ✰ 🈳 ✰ ⟯ 🔰❫ ➿➖•
 
 *Vendas🛍*
 
 *千 • Nick*
 
-*❪ 000 🔰 ❫ •  Loja 🔰*
+*❪ 000 🔰 ❫ • Loja 🔰*
 
 •➖➿ ❪🔰 ⟮ ✰ 🈳 ✰ ⟯ 🔰❫ ➿➖•`;
 };
 
 const getBemVindo = () => {
-    return `*🎗❰📚'Guia Para Iniciantes'📚❱🎗*
-
-
+  return `*🎗❰📚'Guia Para Iniciantes'📚❱🎗*
 
 *_💫°➜1⃣ :_ Sejam bem vindos ao RPG de Naruto Online ! Este é um guia para iniciantes, então leiam atentamente para que vocês possam ter uma noção do que está fazendo no RPG. 📚*
 
 *_💫2⃣ :_ O RPG é baseado no anime "Naruto", no qual usamos Cards (Jutsus) para jogarmos, e se constitui de cincos principais partes. 📚*
 
-*​​✎   🎪⌜ Clãs ⌟🎪*
-*​​✎ ​🏟⌜ Exames ⌟🏟​*
-*​​✎​ ♍⌜ Missões ⌟♍​*
-*​​​✎​ 🏆⌜ Torneios ⌟🏆*
-*​​✎​​   🔰⌜ Lojas ⌟🔰​*
+*    ✎ 🎪⌜ Clãs ⌟🎪*
+*    ✎   🏟⌜ Exames ⌟🏟  *
+*    ✎   ♍⌜ Missões ⌟♍  *
+*      ✎   🏆⌜ Torneios ⌟🏆*
+*    ✎      🔰⌜ Lojas ⌟🔰  *
 
 *_💫°➜3⃣ :_ A seguir leia algumas explicações para entender sobre as coisas do RPG. 📚*
 
 
 
-     os clãs são variados em cada vila_*
+   os clãs são variados em cada vila_*
 *_💫°➜2⃣ :_ Nos clãs os líderes irão passar seus jutsus e irão lhe auxiliar no seu treinamento, e o Kazekage irá mandar avisos/Efetuar torneio entre outras coisas . 📚*
 
 *👊🏻LUTAS👊🏻*
 
-*_💫°➜1⃣ :_ As lutas aqui no RPG podem ser consideradas o intuito principal, ocorrem em missões... Exames e várias outras coisas !​ 📚*
+*_💫°➜1⃣ :_ As lutas aqui no RPG podem ser consideradas o intuito principal, ocorrem em missões... Exames e várias outras coisas !   📚*
 
-*_💫°➜2⃣ :_ Cada luta iniciará com uma placa mostrando dados como o Chakra e o HP de ambos jogadores. Vence aquele que melhor usar seus jutsus e zerar o HP do oponente primeiro.​ 📚*
+*_💫°➜2⃣ :_ Cada luta iniciará com uma placa mostrando dados como o Chakra e o HP de ambos jogadores. Vence aquele que melhor usar seus jutsus e zerar o HP do oponente primeiro.   📚*
 
-*_💫°➜3⃣ :_ Usamos os jutsus na luta, cada qual com sua ,cada patente possui jutsus diferentes e cada clã também.​ 📚*
+*_💫°➜3⃣ :_ Usamos os jutsus na luta, cada qual com sua ,cada patente possui jutsus diferentes e cada clã também.   📚*
 
-*_💫°➜4⃣ :_ Cada patente possui seu HP e Chakra inicial diferente, esta organizado desta maneira :​*
+*_💫°➜4⃣ :_ Cada patente possui seu HP e Chakra inicial diferente, esta organizado desta maneira :  *
 
 _🈂Gennin_ - ❰200%❤/400%🔹❱
 _✳Chunnin_ - ❰300%❤/600%🔹❱
@@ -640,7 +629,7 @@ _🃏Daimyō_ - ❰600%❤/1200%🔹❱
 _🀄Kage_ - ❰700%❤/1400%🔹❱
 _🎴Rikudou_ - ❰800%❤/∞%🔹❱
 
-    *👊🏻❰-🕉' Patentes '🕉-❱👊🏻*
+  *👊🏻❰-🕉' Patentes '🕉-❱👊🏻*
 
 *_💫°➜ :_ Há no RPG o sistema de Patentes, Assim como no anime usamos elas para definir o nível dos ninjas, Sendo elas :*
 
@@ -659,7 +648,7 @@ _🎴Rikudou_ - ❰800%❤/∞%🔹❱
 
 *💫°➜ Jounnin✴: _Nesta patente os ninjas já podem ser juízes,e, entrar em todas as Vilas do RPG !_*
 
-*💫°➜ Anbu💠: _Patente em que o ninja não pode mais participar de exames e recebe algumas tarefas para contribuir com o desenvolvimento da vila  !_* 
+*💫°➜ Anbu💠: _Patente em que o ninja não pode mais participar de exames e recebe algumas tarefas para contribuir com o desenvolvimento da vila !_* 
 
 *💫°➜ Sannin🔘: _Esta patente só pode ser concedida através de muito esforço e com a indicação do Kage !_*
 
@@ -670,48 +659,48 @@ _🎴Rikudou_ - ❰800%❤/∞%🔹❱
 *💫°➜ Rikudou🎴: _Ultima patente do RPG, ele é o líder de tudo, cuida de missões/exames e de todas as vilas e países em geral, cria regras e aprova as indicações dos Kages !_*
 
 
-     *📚❰-♍' Missões '♍-❱📚*
+   *📚❰-♍' Missões '♍-❱📚*
 
 *_💫°➜💢 :_ Aqui no RPG toda semana, em dias de quintas e segundas é passada pela tarde instruções do que fazer para concluir a missão e receber um prêmio ! 📚*
 
-*_💫°➜💢 :_ Para concluir uma missão você deve fazer as atividades que são  passadas❕*
+*_💫°➜💢 :_ Para concluir uma missão você deve fazer as atividades que são passadas❕*
 
 *_💫°➜💢 :_ Para recrutar, nos entramos em grupos de Anime/Jogo/Hentai ( grupos que tenham relação com pessoas que assistem animes ) para chama-las ou seja recruta-las !*
 
 *_💫°➜💢 :_ Para completar as missões lutamos entre si e usamos as lutas ganha na missão, onde usamos os Cards(Jutsus) !*
 
 
-     *🕉❰-🏟' Exames '🏟-❱🕉*
+   *🕉❰-🏟' Exames '🏟-❱🕉*
 
 *_💫°➜💢 :_ Aqui no RPG todo fim de semana, ocorrem exames de graduação, assim como no anime,aqui nós lutamos para subir de patente, nos fins de semanas ocorrem os seguintes exames ❕*
 
-*​❰✳❱ Exame Chunin ❰✳❱​*
+*  ❰✳❱ Exame Chunin ❰✳❱  *
 _💢Ocorre 4 Vezes no mês_
 
-*​❰✴❱ Exame Jounnin ❰✴❱​*
+*  ❰✴❱ Exame Jounnin ❰✴❱  *
 _💢Ocorre 2 Vezes no mês_
 
-*​❰💠❱ Exame Anbu ❰💠❱​*
+*  ❰💠❱ Exame Anbu ❰💠❱  *
 _💢Ocorre 1 Vezes no mês_
 
-*_💫°➜💢 :_ No Exame Chunin,apenas ninjas da patente Gennin ❰🈂❱​ Participam para tentar virar Chunin ❰✳❱​*
+*_💫°➜💢 :_ No Exame Chunin,apenas ninjas da patente Gennin ❰🈂❱   Participam para tentar virar Chunin ❰✳❱  *
 
-*_💫°➜💢 :_ No exame Jounnin,apenas ninjas da patente Chunin ❰✳❱​ participam,para tentar virar Jounnin ❰✴❱​. Portanto,neste exame a dificuldade aumenta e apenas os mais preparados passam.*
+*_💫°➜💢 :_ No exame Jounnin,apenas ninjas da patente Chunin ❰✳❱   participam,para tentar virar Jounnin ❰✴❱  . Portanto,neste exame a dificuldade aumenta e apenas os mais preparados passam.*
 
-*_💫°➜💢 :_ No exame Anbu,apenas ninjas da patente Jounnin ❰✴❱​ Participam para tentar virar Anbu ❰💠❱​. O exame Anbu é o mais difícil, onde apenas uma vez no mês os ninjas tentam fazer o possível e impossível para se graduarem❗*
+*_💫°➜💢 :_ No exame Anbu,apenas ninjas da patente Jounnin ❰✴❱   Participam para tentar virar Anbu ❰💠❱  . O exame Anbu é o mais difícil, onde apenas uma vez no mês os ninjas tentam fazer o possível e impossível para se graduarem❗*
 
 
 *💞❕Estas foram algumas informações que serão necessárias para o seu desenvolvimento ninja,ele será de suma importância,espero que gostem do RPG❕💞*`;
 };
 
 const getMenu = () => {
-    return `💥 **REGRAS DE LUTAS** 💥
-    
-    1.  A luta só é válida com a presença do Juiz (ou um Admin).
-    2.  Duração máxima: 5 rodadas.
-    3.  Qualquer uso de trapaça resulta em desqualificação imediata.
-    
-    ❌ Proibido: Paralisia Dupla.`;
+  return `💥 **REGRAS DE LUTAS** 💥
+  
+  1. A luta só é válida com a presença do Juiz (ou um Admin).
+  2. Duração máxima: 5 rodadas.
+  3. Qualquer uso de trapaça resulta em desqualificação imediata.
+  
+  ❌ Proibido: Paralisia Dupla.`;
 };
 
 // ===================================================
@@ -719,18 +708,18 @@ const getMenu = () => {
 // ===================================================
 
 module.exports = {
-    getKatana,
-    getContrato,
-    getRegrasLutas,
-    getRegrasRpg,
-    getRegrasParalisia,
-    getCronogramaRPG,
-    getCronogramaJuiz,
-    getCronogramaMissao,
-    getLoja,
-    getCompraLoja,
-    getBemVindo,
-    getMenu,
-    // ... adicione todas as 12 funções aqui para exportar
-    // getCronogramaRPG, getCronogramaJuiz, etc.
+  getKatana,
+  getContrato,
+  getRegrasLutas,
+  getRegrasRpg,
+  getRegrasParalisia,
+  getCronogramaRPG,
+  getCronogramaJuiz,
+  getCronogramaMissao,
+  getLoja,
+  getCompraLoja,
+  getBemVindo,
+  getMenu,
+  // ... adicione todas as 12 funções aqui para exportar
+  // getCronogramaRPG, getCronogramaJuiz, etc.
 };
