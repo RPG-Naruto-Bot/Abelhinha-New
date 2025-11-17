@@ -12,6 +12,7 @@ const { handerInfos } = require('./handlers/infosHandler');
 
 // Importa o parser (necessário para a detecção)
 const config = require('./configs/ids-groups.json');
+const { text } = require('stream/consumers');
 
 const commandRoutes = [
     {
@@ -88,7 +89,7 @@ const commandRoutes = [
     {
         name: 'Rota de Informações Gerais para Grupos de Vila',
         description: 'Processa comandos gerais em grupos de vila.',
-        condition: (_msg, remoteJid, _text) => config.allowedVillageGroups.includes(remoteJid),
+        condition: (_msg, remoteJid, _text) => (config.allowedVillageGroups.includes(remoteJid) && text.startsWith('!')),
         action: handerInfos
     }
 ];
