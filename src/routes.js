@@ -89,7 +89,7 @@ const commandRoutes = [
     {
         name: 'Rota de Informações Gerais para Grupos de Vila',
         description: 'Processa comandos gerais em grupos de vila.',
-        condition: (_msg, remoteJid, _text) => (config.allowedVillageGroups.includes(remoteJid) && text.startsWith('!')),
+        condition: (_msg, remoteJid, text) => (config.allowedVillageGroups.includes(remoteJid) && text && typeof text === 'string' && text.toLowerCase().startsWith('!')),
         action: handerInfos
     }
 ];
