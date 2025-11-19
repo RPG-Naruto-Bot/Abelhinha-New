@@ -2,6 +2,13 @@
 
 Todas as mudanças notáveis neste projeto são documentadas neste arquivo.
 
+## [1.7.1](https://github.com/RPG-Naruto-Bot/Abelhinha-New/compare/v1.7.0...v1.7.1) (2025-11-19)
+
+
+### Bug Fixes
+
+* **rotas:** bug na variavel text que fazia o erro de loop infinito ([76cdc3e](https://github.com/RPG-Naruto-Bot/Abelhinha-New/commit/76cdc3ee9eff20f58a018f658f60b98c15261cdc))
+
 # [1.7.0](https://github.com/RPG-Naruto-Bot/Abelhinha-New/compare/v1.6.2...v1.7.0) (2025-11-17)
 
 
