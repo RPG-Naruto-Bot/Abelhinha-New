@@ -694,13 +694,32 @@ _💢Ocorre 1 Vezes no mês_
 };
 
 const getMenu = () => {
-  return `💥 **REGRAS DE LUTAS** 💥
-  
-  1. A luta só é válida com a presença do Juiz (ou um Admin).
-  2. Duração máxima: 5 rodadas.
-  3. Qualquer uso de trapaça resulta em desqualificação imediata.
-  
-  ❌ Proibido: Paralisia Dupla.`;
+  return `🐝 MENU PRINCIPAL – BOT ABELHA 🐝
+
+📜 INFORMAÇÕES
+• !katana
+• !contrato
+• !bemvindo
+
+⚔️ REGRAS
+• !regraslutas
+• !regrasrpg
+• !regrasparalisia
+
+📅 CRONOGRAMAS
+• !cronogramarpg
+• !cronogramajuiz
+• !cronogramamissao
+
+🛒 LOJA
+• !loja
+• !comprar
+
+📌 OUTROS
+• !ficha
+• !menu
+
+Digite o comando desejado 👆`;
 };
 
 // ===================================================
